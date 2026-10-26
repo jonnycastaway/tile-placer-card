@@ -2,83 +2,84 @@
 
 > [!WARNING]
 > # ⚠️ BETA VERSION
-> **Cette carte est en version bêta (`0.9.x`).** Elle évolue vite et peut contenir des bugs. Son format de configuration peut encore changer d'une version à l'autre.
+> **This card is in beta (`0.9.x`).** It changes quickly and may contain bugs. Its configuration format may still change between releases.
 >
-> - **Sauvegarde ton dashboard** avant de l'installer, et avant chaque mise à jour.
-> - Elle n'est testée que sur l'instance de l'auteur, dans un navigateur de bureau. Les écrans tactiles et l'application Companion ne sont pas testés.
-> - Signale tout problème dans les [Issues](https://github.com/SkyTyphon/tile-placer-card/issues).
+> - **Back up your dashboard** before installing it, and before every update.
+> - It is only tested on the author's instance, in a desktop browser. Touch devices and the Companion app are not tested.
+> - Please report any problem in the [Issues](https://github.com/SkyTyphon/tile-placer-card/issues).
 
 [![beta](https://img.shields.io/badge/status-BETA-red.svg)](#)
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
 
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?style=for-the-badge&logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/skytyphoni)
 
-**Français** · [English version](https://github.com/SkyTyphon/tile-placer-card/blob/main/README_eng.md)
+[Français](README_fr.md) · **English**
 
-[![Ouvrir ton Home Assistant et ajouter ce dépôt dans HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=SkyTyphon&repository=tile-placer-card&category=plugin)
+[![Open your Home Assistant instance and add this repository inside HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=SkyTyphon&repository=tile-placer-card&category=plugin)
 
-⭐ **Si la carte te plaît, une étoile sur GitHub (bouton « Star » en haut de la page) aide à la faire connaître. Merci !** Si le lien s'ouvre dans une application (Facebook, etc.), ouvre-le plutôt dans ton navigateur habituel, pour être connecté à GitHub.
+⭐ **If you like the card, a star on GitHub (the "Star" button at the top of the page) helps others find it. Thank you!** If the link opens inside an app (Facebook, etc.), open it in your usual browser instead so you are signed in to GitHub.
 
-🎮 **[Essayer la démo dans ton navigateur](https://skytyphon.github.io/tile-placer-card/demo/)** : la vraie carte sur un faux Home Assistant, rien à installer.
+🎮 **[Try the demo in your browser](https://skytyphon.github.io/tile-placer-card/demo/)**: the real card on a fake Home Assistant, nothing to install. (The demo page is in French.)
 
-Carte Lovelace (JavaScript natif, un seul fichier, sans build, sans dépendance) qui pose des **bulles** (icône MDI, nom, état d'une entité) sur une **image de fond**, par exemple le plan de ta maison. Les bulles se placent en pourcentage, se déplacent **directement sur la carte** à la souris ou au doigt, et se configurent une par une (nom, icône, entité, taille, couleur, actions au clic, au double clic et à l'appui long) dans un panneau qui s'ouvre sur le plan. Les modifications sont enregistrées dans le dashboard.
+A Lovelace card (plain JavaScript, single file, no build, no dependency) that places **bubbles** (MDI icon, name, optional entity state) on a **background image**, for example your house floor plan. Bubbles are positioned in percent, dragged **directly on the map** with a mouse or a finger, and configured one by one (name, icon, entity, size, colour, tap / double tap / hold actions) from a panel that opens on the map. Changes are saved back into the dashboard.
 
-Elle s'inspire de l'add-on HA Views, mais elle est livrée sous forme de carte.
+Inspired by the HA Views add-on, but delivered as a card.
 
-![Capture d'écran de Tile Placer Card en mode édition](docs/screenshot.webp)
+![Screenshot of Tile Placer Card in edit mode](docs/screenshot.webp)
 
-*Capture d'écran réelle, en mode édition : des appareils posés sur un plan, avec la barre d'outils en bas (« Nouvel appareil », « Image de fond… », « Enregistrer », « Annuler »).*
+*Real screenshot, in edit mode: devices placed on a floor plan, with the toolbar at the bottom ("Nouvel appareil" = new device, "Image de fond…" = background image, "Enregistrer" = save, "Annuler" = cancel).*
 
-> **État :** version `0.x`. Utilisée sur l'instance Home Assistant de l'auteur, dans un navigateur de bureau : déplacement, panneau de sélection, vue plein écran, actions au clic et nouvel appareil fonctionnent. Les écrans tactiles et l'application Companion ne sont **pas testés**. Voir [Limites connues](#limites-connues).
+> **Status:** `0.x`. Used on the author's own Home Assistant instance, in a desktop browser: dragging, selection panel, full-screen panel view, click actions and "New device" all work. Touch devices and the Companion app are **not tested**. See [Known limitations](#known-limitations).
 
-## Sommaire
+## Contents
 
 1. [Installation](#installation)
-2. [Démarrage rapide](#démarrage-rapide)
-3. [Utiliser la carte au quotidien](#utiliser-la-carte-au-quotidien)
-4. [Modifier le plan](#modifier-le-plan)
-5. [Configuration YAML](#configuration-yaml)
+2. [Quick start](#quick-start)
+3. [Everyday use](#everyday-use)
+4. [Editing the map](#editing-the-map)
+5. [YAML configuration](#yaml-configuration)
 6. [Actions](#actions)
-7. [Conseils](#conseils)
-8. [Limites connues](#limites-connues)
-9. [Dépannage](#dépannage)
-10. [Développement](#développement)
+7. [Tips](#tips)
+8. [Known limitations](#known-limitations)
+9. [Troubleshooting](#troubleshooting)
+10. [Development](#development)
+11. [Changelog](#changelog)
 
 ## Installation
 
-### Avec HACS (dépôt personnalisé)
+### HACS (custom repository)
 
-[**Tile Placer Card** dans HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=SkyTyphon&repository=tile-placer-card&category=plugin) · [Code source sur GitHub](https://github.com/SkyTyphon/tile-placer-card)
+[**Tile Placer Card** in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=SkyTyphon&repository=tile-placer-card&category=plugin) · [Source code on GitHub](https://github.com/SkyTyphon/tile-placer-card)
 
-**Méthode rapide :** clique sur le bouton, il ouvre ton Home Assistant sur la page du dépôt dans HACS. Valide l'ajout du dépôt, puis clique sur **Télécharger**.
+**Quick way:** click the button; it opens your Home Assistant on this repository's page in HACS. Confirm adding the repository, then click **Download**.
 
-[![Ouvrir ton Home Assistant et ajouter ce dépôt dans HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=SkyTyphon&repository=tile-placer-card&category=plugin)
+[![Open your Home Assistant instance and add this repository inside HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=SkyTyphon&repository=tile-placer-card&category=plugin)
 
-Le bouton passe par My Home Assistant : à la première utilisation, indique l'adresse de ton instance. HACS doit déjà être installé.
+The button goes through My Home Assistant: the first time, enter the address of your instance. HACS must already be installed.
 
-**Méthode manuelle :**
+**Manual way:**
 
-1. Dans HACS, ouvre le menu ⋮ puis **Dépôts personnalisés**.
-2. Dépôt : `https://github.com/SkyTyphon/tile-placer-card`, type **Tableau de bord** (Lovelace).
-3. Installe **Tile Placer Card**, puis recharge le navigateur avec Ctrl+F5.
+1. In HACS, open the ⋮ menu, then **Custom repositories**.
+2. Repository: `https://github.com/SkyTyphon/tile-placer-card`, type **Dashboard** (Lovelace).
+3. Install **Tile Placer Card**, then reload the browser with Ctrl+F5.
 
-HACS déclare la ressource tout seul. Les mises à jour passent aussi par HACS.
+HACS registers the resource automatically, and updates also go through HACS.
 
-### À la main
+### Manual
 
-1. Copie `tile-placer-card.js` dans `/config/www/`.
-2. Va dans Paramètres, Tableaux de bord, menu ⋮, **Ressources**, et ajoute `/local/tile-placer-card.js?v=0.9.61` en type **Module JavaScript**.
-3. Change la valeur de `?v=` à chaque mise à jour : Home Assistant garde `/local/` en cache très longtemps.
+1. Copy `tile-placer-card.js` to `/config/www/`.
+2. Go to Settings, Dashboards, ⋮ menu, **Resources**, and add `/local/tile-placer-card.js?v=0.9.61` as a **JavaScript module**.
+3. Change the `?v=` value after each update: Home Assistant caches `/local/` for a very long time.
 
-## Démarrage rapide
+## Quick start
 
-1. **Ajoute la carte sans écrire de YAML.** Modifie ton dashboard, clique sur **Ajouter une carte**, cherche **Tile Placer Card**. Pour une carte qui occupe tout l'écran, mets-la dans une vue de type **Panneau (1 carte)**.
-2. **Ajoute ton image de fond.** Sur une carte sans image, clique sur la carte : un dialogue propose d'**envoyer le plan** (PNG, JPG…) depuis ton ordinateur. L'image est stockée dans Home Assistant, enregistrée dans la carte, et les proportions sont lues sur l'image : rien à calculer. Tu peux aussi indiquer l'adresse d'une image déjà présente, par exemple `/local/plan.png` pour un fichier de `/config/www/`.
-3. **Clique sur « Créer la page « Plan » en un clic ».** Ce bouton apparaît sur la carte neuve, pour les administrateurs. Il crée un dashboard **Plan** dans la barre latérale, avec la carte en plein écran, et t'y emmène : l'adresse est `/plan-editable`. Ensuite, un clic sur « Plan » dans la barre latérale suffit.
-   (Si tu préfères placer la carte toi-même, enregistre le dashboard et quitte le mode édition de Home Assistant.)
-4. **Clique sur le crayon** en haut à droite de la carte, puis sur **+ Nouvel appareil**. Choisis l'entité dans le panneau, glisse la bulle à sa place, clique sur **Enregistrer**. Le bouton **Image de fond…** de la barre d'outils permet de changer l'image à tout moment.
+1. **Add the card without writing YAML.** Edit your dashboard, click **Add card**, search for **Tile Placer Card**. For a card filling the whole screen, put it in a **Panel (single card)** view.
+2. **Add your background image.** On a card with no image, click the card: a dialog offers to **upload your plan** (PNG, JPG…) from your computer. The image is stored in Home Assistant, saved in the card, and the proportions are read from the image: nothing to calculate. You can also enter the address of an image already there, for example `/local/plan.png` for a file in `/config/www/`.
+3. **Click "Créer la page « Plan » en un clic" (create the Plan page).** This button shows on a brand-new card, for administrators. It creates a **Plan** dashboard in the sidebar, with the card full screen, and takes you there: the address is `/plan-editable`. After that, one click on "Plan" in the sidebar is enough.
+   (If you prefer to place the card yourself, save the dashboard and leave Home Assistant's own edit mode.)
+4. **Click the pencil** at the top right of the card, then **+ New device**. Pick the entity in the panel, drag the bubble into place and click **Save**. The **Image de fond…** (background image) button in the toolbar lets you change the image at any time.
 
-Le crayon n'apparaît que pour un compte administrateur. Le même réglage en YAML :
+The pencil is only shown to administrator accounts. The same setup in YAML:
 
 ```yaml
 type: custom:tile-placer-card
@@ -87,108 +88,108 @@ fit_screen: true
 tiles: []
 ```
 
-## Utiliser la carte au quotidien
+## Everyday use
 
-En dehors du mode édition, la carte se comporte comme un tableau de bord normal :
+Outside edit mode the card behaves like a normal dashboard card:
 
-- **Clic** : action au clic. Sans réglage, une bulle liée à une entité ouvre la fenêtre « plus d'infos ».
-- **Double clic** : action au double clic, si elle est définie. Dans ce cas, le clic simple est retardé de 250 ms pour distinguer les deux.
-- **Appui long** : action à l'appui long (500 ms), si elle est définie.
-- **Survol** : le nom de la bulle s'affiche (selon le réglage « Affichage du nom »).
-- Une bulle dont l'entité est active (allumée, ouverte, en cours…) prend la couleur d'accent ou la couleur choisie. Une bulle dont l'entité est indisponible ou introuvable est grisée avec un contour en pointillés.
+- **Tap**: runs the tap action. With no setting, a bubble linked to an entity opens the "more info" dialog.
+- **Double tap**: runs the double tap action, when defined. In that case the single tap is delayed by 250 ms so the two can be told apart.
+- **Hold**: runs the hold action (500 ms), when defined.
+- **Hover**: the bubble name is shown (depending on the "Name display" setting).
+- A bubble whose entity is active (on, open, running…) takes the accent colour or the chosen colour. A bubble whose entity is unavailable or missing is dimmed with a dashed outline.
 
-## Modifier le plan
+## Editing the map
 
-### Entrer en mode édition
+### Entering edit mode
 
-Clique sur le **crayon**. Un cadre en pointillés et une grille apparaissent, et une barre d'outils s'affiche sous le plan : **+ Nouvel appareil**, **Image de fond…** (envoyer ou changer l'image), **Enregistrer**, **Annuler** et un message d'état.
+Click the **pencil**. A dashed frame and a grid appear, and a toolbar shows under the map: **+ New device**, **Image de fond…** (upload or change the background image), **Save**, **Cancel** and a status message.
 
-### Déplacer une bulle
+### Moving a bubble
 
-Glisse la bulle avec la souris ou le doigt. Avec une bulle qui a le focus, les flèches la déplacent de 1 %, et Maj + flèches de 5 %.
+Drag the bubble with the mouse or a finger. With a bubble focused or selected, arrow keys move it by 1 %, Shift + arrows by 5 %.
 
-### Créer un appareil
+### Creating a device
 
-Clique sur **+ Nouvel appareil**. Une bulle de 36 px apparaît près du centre, sur un emplacement libre pour ne pas se superposer à une autre, et son panneau s'ouvre. Choisis d'abord l'**appareil** dans le menu déroulant « Appareil » : sa première entité utile est choisie pour toi et son nom est repris. Tu peux ensuite changer l'entité. Sans appareil, choisis directement une entité. L'icône de l'entité est utilisée tant que tu n'en choisis pas une toi-même. Glisse ensuite la bulle à sa place.
+Click **+ New device**. A 36 px bubble appears near the centre, on a free spot so it does not stack on another one, and its panel opens. First pick the **device** in the "Appareil" (device) drop-down: its first useful entity is selected for you and its name is reused. You can then change the entity. With no device, pick an entity directly. The entity icon is used until you choose one yourself. Then drag the bubble into place.
 
-### Régler une bulle
+### Configuring a bubble
 
-Clique sur une bulle (sans la déplacer) pour la sélectionner : un panneau flottant s'ouvre sur le plan et chaque changement se voit **en direct** sur la carte.
+Click a bubble (without dragging it) to select it: a floating panel opens on the map and every change is shown **live** on the card.
 
-| Réglage | Effet |
+| Setting | Effect |
 |---|---|
-| Nom | Texte affiché. Sans nom, c'est le nom de l'entité. |
-| Icône | Icône MDI. Sans icône, c'est celle de l'entité. |
-| Appareil | Menu déroulant des appareils de Home Assistant. Choisit l'entité principale de l'appareil et reprend son nom si la bulle n'en a pas. |
-| Entité | Entité liée (état, plus d'infos, bascule…). |
-| Affichage du nom | Au survol et à la sélection, toujours, ou jamais. |
-| Forme | Rond, carré arrondi, carré ou rectangle. |
-| Taille (hauteur) | Taille de la bulle, de 20 à 300 px. |
-| Largeur | Pour la forme rectangle seulement, de 20 à 400 px. |
-| Couleur de l'icône | Couleur CSS, variable de thème, ou sélecteur de couleur. |
-| Afficher l'état sous la bulle | Ajoute l'état de l'entité sous la bulle. |
-| Couleurs d'état | Pour un `switch`, `light`, `input_boolean`, `fan`, `binary_sensor` ou `cover` : couleur selon l'état (actif, inactif, en mouvement). Voir [Changer la couleur d'une bulle](#changer-la-couleur-dune-bulle). |
-| Fond transparent | Icône seule, sans disque de fond. |
-| Actions | Clic, double clic, appui long (voir [Actions](#actions)). |
-| Supprimer la bulle | Retire la bulle après confirmation. |
+| Name | Displayed text. With no name, the entity name is used. |
+| Icon | MDI icon. With no icon, the entity icon is used. |
+| Device | Drop-down of Home Assistant devices. Selects the device's main entity and reuses its name when the bubble has none. |
+| Entity | Linked entity (state, more info, toggle…). |
+| Name display | On hover and selection, always, or never. |
+| Shape | Round, rounded square, square or rectangle. |
+| Size (height) | Bubble size, 20 to 300 px. |
+| Width | Rectangle shape only, 20 to 400 px. |
+| Icon colour | CSS colour, theme variable, or colour picker. |
+| Show state under the bubble | Adds the entity state under the bubble. |
+| State colours | For a `switch`, `light`, `input_boolean`, `fan`, `binary_sensor` or `cover`: colour by state (active, inactive, moving). See [Changing a bubble's colour](#changing-a-bubbles-colour). |
+| Transparent background | Icon only, no background disc. |
+| Actions | Tap, double tap, hold (see [Actions](#actions)). |
+| Delete bubble | Removes the bubble after confirmation. |
 
-### Changer la couleur d'une bulle
+### Changing a bubble's colour
 
-Il y a deux réglages de couleur, dans le panneau de la bulle :
+There are two colour settings in the bubble panel:
 
-- **Couleur de l'icône** : une couleur fixe, choisie à la main, pour une bulle sans état à suivre.
-- **Couleurs d'état** : l'icône change de couleur selon l'état de l'entité (allumé ou éteint, ouvert ou fermé…). Elles n'apparaissent que si l'entité est d'un type à deux états : `switch`, `light`, `input_boolean`, `fan`, `binary_sensor` ou `cover`. Pour ces types, ce sont elles qui décident de la couleur.
+- **Icon colour**: a fixed colour you pick by hand, for a bubble with no state to follow.
+- **State colours**: the icon changes colour with the entity state (on or off, open or closed…). They only appear when the entity is a two-state type: `switch`, `light`, `input_boolean`, `fan`, `binary_sensor` or `cover`. For these types, they decide the colour.
 
-Pour les modifier :
+To change them:
 
-1. Ouvre le mode édition (crayon), puis clique sur la bulle **sans la déplacer** : son panneau s'ouvre.
-2. Vérifie qu'une **entité** est choisie (champ « Entité », ou choisis un « Appareil »). Sans entité, il n'y a pas de couleur d'état.
-3. Fais défiler le panneau jusqu'aux listes sous « Couleur de l'icône » :
-   - « Couleur quand actif (allumé, ouvert) » ;
-   - « Couleur quand inactif (éteint, fermé) » ;
-   - pour un `cover` (volet, porte de garage…), en plus : « Couleur en mouvement » et « Couleur entre 5 et 95 % (volet) ».
-4. Ouvre la liste et choisis une couleur (jaune, orange, rouge, vert, bleu, violet, blanc, gris, noir, cyan). Pour une autre teinte, choisis **Personnalisée…** : un carré de couleur apparaît à côté de la liste, clique dessus pour choisir. La bulle change tout de suite.
-5. Clique sur **Enregistrer** dans la barre d'outils. Sans cela, le changement n'est pas gardé.
+1. Enter edit mode (pencil), then click the bubble **without dragging it**: its panel opens.
+2. Check that an **entity** is set (the "Entité" field, or pick a "Appareil"). With no entity there is no state colour.
+3. Scroll the panel to the lists under "Couleur de l'icône":
+   - "Couleur quand actif (allumé, ouvert)" (colour when active: on, open);
+   - "Couleur quand inactif (éteint, fermé)" (colour when inactive: off, closed);
+   - for a `cover` (shutter, garage door…), also "Couleur en mouvement" (moving) and "Couleur entre 5 et 95 % (volet)" (between 5 and 95 %).
+4. Open the list and pick a colour (yellow, orange, red, green, blue, purple, white, grey, black, cyan). For another shade, pick **Personnalisée…** (custom): a colour square appears next to the list, click it to choose. The bubble updates immediately.
+5. Click **Save** in the toolbar. Otherwise the change is not kept.
 
-Couleurs par défaut, sans rien régler :
+Default colours, with nothing set:
 
-| Type d'entité | Actif / ouvert | Inactif / fermé | En mouvement | Entre 5 et 95 % |
+| Entity type | Active / open | Inactive / closed | Moving | Between 5 and 95 % |
 |---|---|---|---|---|
-| `switch`, `light`, `input_boolean`, `fan`, autres `binary_sensor` | jaune | gris | | |
-| Portes et fenêtres : `binary_sensor` de classe `door`, `garage_door`, `opening`, `window` ; `cover` de classe `door`, `garage`, `gate`, `window` | rouge | vert | cyan (`cover`) | violet (`cover` avec position) |
-| Volets : autres `cover` | bleu | orange | cyan | violet |
+| `switch`, `light`, `input_boolean`, `fan`, other `binary_sensor` | yellow | grey | | |
+| Doors and windows: `binary_sensor` of class `door`, `garage_door`, `opening`, `window`; `cover` of class `door`, `garage`, `gate`, `window` | red | green | cyan (`cover`) | purple (`cover` with a position) |
+| Shutters: other `cover` entities | blue | orange | cyan | purple |
 
-Pour un `cover` avec position, « actif » veut dire position à 95 % ou plus et « inactif » position à 5 % ou moins ; sans position, « actif » veut dire état `open`. Pendant `opening` et `closing`, la couleur « en mouvement » passe avant les autres. Un état indisponible prend la couleur d'inactif. Si les listes n'apparaissent pas : l'entité n'est pas d'un des types ci-dessus, ou la version de la carte est ancienne (Ctrl+F5, la version s'affiche dans la barre d'outils). Dans le fichier de configuration, ces choix sont `color_on`, `color_off`, `color_moving` et `color_partial` ; choisir la couleur par défaut n'écrit rien.
+For a `cover` with a position, "active" means a position of 95 % or more and "inactive" a position of 5 % or less; with no position, "active" means the `open` state. While `opening` or `closing`, the "moving" colour takes priority. An unavailable state uses the inactive colour. If the lists do not appear: the entity is not one of the types above, or the card version is old (Ctrl+F5; the version is shown in the toolbar). In the configuration, these choices are `color_on`, `color_off`, `color_moving` and `color_partial`; picking the default colour writes nothing.
 
-**Redimensionner à la main :** une bulle sélectionnée affiche une poignée carrée en bas à droite. Glisse-la pour agrandir ou réduire la bulle (pour un rectangle, la largeur et la hauteur suivent séparément). Les curseurs du panneau donnent la même chose, plus précisément.
+**Resizing by hand:** a selected bubble shows a square handle at its bottom right. Drag it to grow or shrink the bubble (for a rectangle, width and height follow separately). The panel sliders do the same, more precisely.
 
-Un clic sur une zone vide du plan désélectionne la bulle.
+Clicking an empty area of the map deselects the bubble.
 
-### Enregistrer ou annuler
+### Saving or cancelling
 
-- **Enregistrer** écrit les bulles dans le dashboard puis quitte le mode édition. Le bouton n'est actif que s'il y a des modifications.
-- **Annuler** abandonne les modifications non enregistrées, après confirmation.
+- **Save** writes the bubbles into the dashboard and leaves edit mode. The button is only enabled when there are changes.
+- **Cancel** discards unsaved changes, after confirmation.
 
-L'enregistrement relit la configuration du dashboard, retrouve cette carte par comparaison exacte avec la configuration chargée au départ, remplace sa liste `tiles` et enregistre. Si la carte a été modifiée ailleurs entre-temps, ou si le dashboard est en mode YAML, une erreur s'affiche et **rien n'est écrit**. Sauvegarde ton dashboard avant le premier enregistrement.
+Saving re-reads the dashboard configuration, finds this card by exact comparison with the configuration it was loaded with, replaces its `tiles` list and saves. If the card changed elsewhere in the meantime, or if the dashboard is in YAML mode, an error is shown and **nothing is written**. Back up your dashboard before the first save.
 
-## Configuration YAML
+## YAML configuration
 
-Les réglages généraux (image, titre, proportions, affichage des noms) se font dans l'éditeur visuel de la carte ou en YAML ; le mode édition sur le plan gère les bulles.
+General settings (image, title, proportions, name display) are set in the card's visual editor or in YAML; the on-map edit mode manages the bubbles.
 
 ```yaml
 type: custom:tile-placer-card
-title: Rez-de-chaussée
+title: Ground floor
 background: /local/plan.png
 aspect_ratio: "1200:896"
 fit_screen: true
 label_mode: hover
 tiles:
-  - id: salon
+  - id: living
     x_pct: 30
     y_pct: 45
     icon: mdi:ceiling-light
-    entity: light.salon
-    name: Salon
+    entity: light.living_room
+    name: Living room
     size: 40
     color: "#ffa500"
     tap_action:
@@ -197,95 +198,95 @@ tiles:
       action: more-info
 ```
 
-D'autres exemples sont dans [`examples/basic.yaml`](examples/basic.yaml).
+More examples in [`examples/basic.yaml`](examples/basic.yaml).
 
-### Options de la carte
-
-| Option | Description |
-|---|---|
-| `background` | URL de l'image (ex. `/local/plan.png`). Facultatif. Elle doit être accessible sans en-tête d'autorisation : place-la dans `/config/www/`. |
-| `aspect_ratio` | Facultatif. Sans valeur, les proportions sont lues sur l'image de fond. Sinon `16:9`, `4/3`, `1.5` ou `56.25%` ; dans ce cas, utilise le vrai rapport de ton image. Sans image ni valeur : `16:9`. |
-| `fit_screen` | `true` : la carte est aussi grande que possible sans dépasser la hauteur de l'écran, proportions conservées. Idéal dans une vue Panneau. |
-| `screen_offset` | Hauteur en px retirée de la hauteur d'écran quand `fit_screen` est actif (défaut `150`). |
-| `label_mode` | Affichage du nom par défaut : `hover` (défaut), `always`, `never`. |
-| `title` | Titre de la carte. Facultatif. |
-| `editable` | `false` masque le crayon (défaut `true`). Le mode édition exige de toute façon un compte administrateur. |
-| `switch_path` | Adresse d'un autre plan (ex. `/my-dashboard/0`). Ajoute un bouton en haut à gauche pour y basculer. Facultatif. |
-| `switch_label` | Texte du bouton de bascule. Facultatif. |
-| `language` | Langue de l'interface : `fr`, `de` ou `en`. Sans valeur, elle suit la langue du profil Home Assistant. Facultatif. |
-| `tiles` | Liste des bulles. |
-
-**Langues.** L'interface (barre d'outils, panneau des bulles, éditeur, messages) suit la langue du profil Home Assistant. L'allemand et l'anglais sont fournis ; tout le reste retombe sur le français, y compris tant que la carte n'a pas encore reçu l'objet `hass`. L'option `language` force une langue, par exemple pour un dashboard partagé entre plusieurs comptes.
-
-### Options d'une bulle
+### Card options
 
 | Option | Description |
 |---|---|
-| `id` | Identifiant unique (généré s'il manque). |
-| `x_pct`, `y_pct` | Centre de la bulle, de 0 à 100 % de la carte. |
-| `icon` | Icône MDI. Vide : icône de l'entité. |
-| `entity` | Entité liée. Facultatif. |
-| `name` | Nom affiché. Sans nom : nom convivial de l'entité. |
-| `shape` | `circle` (défaut), `rounded`, `square` ou `rectangle`. |
-| `size` | Taille (hauteur) de la bulle en px (défaut 48, de 20 à 300). |
-| `width` | Largeur en px, utilisée seulement avec `shape: rectangle` (défaut : 1,6 fois `size`). |
-| `color` | Couleur CSS ou variable, appliquée à l'icône (sauf pour un `switch`, `light`, `input_boolean`, `fan`, `binary_sensor` ou `cover`, voir `color_on` et `color_off`). |
-| `color_on`, `color_off`, `color_moving`, `color_partial` | Pour une entité `switch.*`, `light.*`, `input_boolean.*`, `fan.*`, `binary_sensor.*` ou `cover.*` : couleur de l'icône quand l'entité est active (`on`, ou `open` / `opening` pour un `cover`) et quand elle est inactive (défaut `#ffc107` jaune et `#9e9e9e` gris). |
-| `label_mode` | `hover`, `always` ou `never` pour cette bulle. |
-| `show_state` | `true` affiche l'état de l'entité sous la bulle (défaut `false`). |
-| `transparent` | `true` : icône seule, sans fond. |
-| `tap_action`, `double_tap_action`, `hold_action` | Voir [Actions](#actions). |
+| `background` | Image URL (e.g. `/local/plan.png`). Optional. It must be reachable without an authorization header, so put it in `/config/www/`. |
+| `aspect_ratio` | Optional. When omitted, the proportions are read from the background image. Otherwise `16:9`, `4/3`, `1.5` or `56.25%`; then use the real ratio of your image. With no image and no value: `16:9`. |
+| `fit_screen` | `true`: the card is as large as possible without exceeding the screen height, aspect ratio kept. Best in a panel view. |
+| `screen_offset` | Height in px removed from the screen height when `fit_screen` is on (default `150`). |
+| `label_mode` | Default name display: `hover` (default), `always`, `never`. |
+| `title` | Card title. Optional. |
+| `editable` | `false` hides the pencil (default `true`). Editing also requires an administrator account. |
+| `switch_path` | Address of another plan (e.g. `/my-dashboard/0`). Adds a button at the top left to switch to it. Optional. |
+| `switch_label` | Text of the switch button. Optional. |
+| `language` | Interface language: `fr`, `de` or `en`. When omitted, it follows the language of the Home Assistant profile. Optional. |
+| `tiles` | List of bubbles. |
 
-Les coordonnées se calculent ainsi : `x_pct = (x + largeur/2) / largeur_image × 100`, de même pour `y_pct` avec la hauteur.
+**Languages.** The interface (toolbar, bubble panel, editor, messages) follows the language of the Home Assistant profile. German and English are included; everything else falls back to French, including while the card has not received the `hass` object yet. The `language` option forces a language, for example for a dashboard shared between several accounts.
+
+### Bubble options
+
+| Option | Description |
+|---|---|
+| `id` | Unique id (generated when missing). |
+| `x_pct`, `y_pct` | Centre of the bubble, 0 to 100 % of the card. |
+| `icon` | MDI icon. When empty, the entity icon is used. |
+| `entity` | Linked entity. Optional. |
+| `name` | Displayed name. Falls back to the entity friendly name. |
+| `shape` | `circle` (default), `rounded`, `square` or `rectangle`. |
+| `size` | Bubble size (height) in px (default 48, 20 to 300). |
+| `width` | Width in px, used only with `shape: rectangle` (default: 1.6 times `size`). |
+| `color` | Any CSS colour or variable, applied to the icon (except for a `switch`, `light`, `input_boolean`, `fan`, `binary_sensor` or `cover`, see `color_on` and `color_off`). |
+| `color_on`, `color_off`, `color_moving`, `color_partial` | For a `switch.*`, `light.*`, `input_boolean.*`, `fan.*`, `binary_sensor.*` or `cover.*` entity: icon colour when the entity is active (`on`, or `open` / `opening` for a `cover`) and when it is inactive (default `#ffc107` yellow and `#9e9e9e` grey). |
+| `label_mode` | `hover`, `always` or `never` for this bubble. |
+| `show_state` | `true` shows the entity state under the bubble (default `false`). |
+| `transparent` | `true`: icon only, no background. |
+| `tap_action`, `double_tap_action`, `hold_action` | See [Actions](#actions). |
+
+Coordinates are computed as `x_pct = (x + width/2) / image_width × 100`, and the same for `y_pct` with the height.
 
 ## Actions
 
-Chaque bulle accepte trois actions : `tap_action`, `double_tap_action` et `hold_action`.
+Each bubble accepts three actions: `tap_action`, `double_tap_action` and `hold_action`.
 
-| Action | Rôle | Champs |
+| Action | Purpose | Fields |
 |---|---|---|
-| `none` | Ne fait rien. | |
-| `more-info` | Ouvre la fenêtre « plus d'infos » de l'entité. | `entity` (facultatif, sinon celle de la bulle) |
-| `toggle` | Bascule l'entité. | `entity` (facultatif) |
-| `call-service` | Appelle un service (`perform_action` accepté comme synonyme de `service`). | `service` (`domaine.service`), `data`, `target` |
-| `navigate` | Va vers une page du dashboard. | `navigation_path`, `navigation_replace` |
-| `url` | Ouvre une adresse dans un nouvel onglet. | `url_path` (`javascript:`, `data:` et `vbscript:` sont refusés) |
+| `none` | Does nothing. | |
+| `more-info` | Opens the entity "more info" dialog. | `entity` (optional, defaults to the bubble's) |
+| `toggle` | Toggles the entity. | `entity` (optional) |
+| `call-service` | Calls a service (`perform_action` is accepted as a synonym of `service`). | `service` (`domain.service`), `data`, `target` |
+| `navigate` | Goes to a dashboard page. | `navigation_path`, `navigation_replace` |
+| `url` | Opens an address in a new tab. | `url_path` (`javascript:`, `data:` and `vbscript:` are refused) |
 
-Règles :
+Rules:
 
-- Sans `tap_action`, une bulle liée à une entité ouvre « plus d'infos ». Dans le panneau, ce comportement s'appelle « Par défaut ». Le choix « Aucune » force au contraire l'absence d'action.
-- Sans `double_tap_action` ni `hold_action`, ces gestes ne font rien.
-- Dans le panneau d'édition, les actions s'appliquent **en direct** dès qu'elles sont complètes. Une action incomplète (service sans `domaine.service`, JSON invalide, chemin ou URL manquant) affiche « Pas encore appliqué » et n'est pas écrite.
+- With no `tap_action`, a bubble linked to an entity opens "more info". In the panel this is called "Default". Choosing "None" forces no action instead.
+- With no `double_tap_action` or `hold_action`, those gestures do nothing.
+- In the edit panel, actions apply **live** as soon as they are complete. An incomplete action (service without `domain.service`, invalid JSON, missing path or URL) shows "Not applied yet" and is not written.
 
-Exemple d'appel de service à l'appui long :
+Example of a service call on hold:
 
 ```yaml
 hold_action:
   action: call-service
   service: light.turn_on
   data:
-    entity_id: light.salon
+    entity_id: light.living_room
     brightness_pct: 100
 ```
 
-## Basculer entre un ancien plan et cette carte
+## Switching between an old plan and this card
 
-Si tu as déjà un plan en `picture-elements` et que tu veux passer de l'un à l'autre, relie-les par un bouton dans chaque sens. Seul le **dernier mot de l'adresse** change selon ton dashboard (`/my-dashboard/0`, `/energy/plan`…) : prends l'adresse de ta page dans la barre du navigateur.
+If you already have a `picture-elements` plan and want to move between the two, link them with a button in each direction. Only the **last part of the address** depends on your dashboard (`/my-dashboard/0`, `/energy/plan`…): take your page's address from the browser bar.
 
-- **Depuis cette carte vers l'autre plan** : renseigne `switch_path` (champ « Lien vers un autre plan » de l'éditeur visuel) :
+- **From this card to the other plan**: set `switch_path` (the "Lien vers un autre plan" field of the visual editor):
 
   ```yaml
   type: custom:tile-placer-card
   switch_path: /my-dashboard/0
-  switch_label: Ancien plan
+  switch_label: Old plan
   ```
 
-- **Depuis le `picture-elements` vers cette carte** : ajoute cet élément dans la carte `picture-elements`, avec l'adresse de la page de Tile Placer Card :
+- **From the `picture-elements` to this card**: add this element to the `picture-elements` card, with the address of the Tile Placer Card page:
 
   ```yaml
   - type: icon
     icon: mdi:pencil-ruler
-    title: Plan éditable
+    title: Editable plan
     style:
       top: 4%
       left: 3%
@@ -294,46 +295,56 @@ Si tu as déjà un plan en `picture-elements` et que tu veux passer de l'un à l
       navigation_path: /my-dashboard/plan-editable
   ```
 
-## Conseils
+## Tips
 
-- **Carte en grand.** Mets la carte seule dans une vue de type **Panneau** avec `fit_screen: true`. Ajuste `screen_offset` si la carte dépasse ou laisse trop de marge.
-- **Image de fond.** Un fichier dans `/config/www/` est servi sous `/local/`. N'utilise pas `/media/` : ces fichiers demandent une autorisation que la balise image ne fournit pas.
-- **Rapport de l'image.** Laisse `aspect_ratio` vide : il est lu sur l'image. Si tu le fixes à la main, divise la largeur par la hauteur du fichier ; une valeur fausse décale toutes les bulles.
-- **Nom plutôt qu'état.** Pour une vue dense, laisse `show_state: false` et `label_mode: hover`, puis active l'état seulement sur les capteurs utiles.
-- **Plusieurs cartes identiques.** Ajoute un champ distinctif comme `title` pour que l'enregistrement sache laquelle modifier.
+- **Big map.** Put the card alone in a **Panel** view with `fit_screen: true`. Adjust `screen_offset` if the card overflows or leaves too much margin.
+- **Background image.** A file in `/config/www/` is served as `/local/`. Do not use `/media/`: those files need an authorization that an image tag does not send.
+- **Image ratio.** Leave `aspect_ratio` empty: it is read from the image. If you set it by hand, divide the file width by its height; a wrong value shifts every bubble.
+- **Name rather than state.** For a dense view, keep `show_state: false` and `label_mode: hover`, and enable the state only on useful sensors.
+- **Several identical cards.** Add a distinguishing field such as `title` so saving knows which one to change.
 
-## Limites connues
+## Known limitations
 
-- L'enregistrement fonctionne **uniquement** pour les dashboards en mode stockage (modifiés depuis l'interface), pas pour les dashboards YAML.
-- Le dashboard est déduit du premier segment de l'URL (`/lovelace/...` = dashboard par défaut). Une carte affichée ailleurs (aperçu de l'éditeur de carte, fenêtre) peut ne pas pouvoir enregistrer.
-- L'enregistrement est refusé si deux cartes du dashboard sont rigoureusement identiques.
-- Les actions sont codées dans la carte, sans le `handleAction` natif : pas de `confirmation`, de `haptic` ni de `repeat`.
-- L'éditeur visuel couvre les réglages généraux seulement ; les bulles se gèrent sur le plan.
-- Si `ha-icon-picker` ou `ha-entity-picker` ne sont pas encore chargés (composants chargés à la demande par Home Assistant), le panneau bascule sur des champs texte.
-- En mode édition, les événements souris et tactiles des bulles ne remontent pas aux modules de navigation par balayage comme `hass-swipe-navigation`, sinon un glissement changerait de vue au lieu de déplacer la bulle.
-- L'envoi de l'image utilise l'intégration Home Assistant « Image » (active par défaut). Elle est limitée à 10 Mo ; sinon, indique l'adresse d'un fichier de `/config/www/`.
-- Écrans tactiles et application Companion : non testés.
+- Saving works **only** for dashboards in storage mode (edited from the UI), not YAML dashboards.
+- The dashboard is deduced from the first URL segment (`/lovelace/...` = default dashboard). A card shown in another context (card editor preview, dialog) may not be able to save.
+- Saving is refused when two cards of the dashboard are exactly identical.
+- Actions are implemented inside the card (no native `handleAction`): no `confirmation`, `haptic` or `repeat`.
+- The visual editor only covers general settings; bubbles are managed on the map.
+- If `ha-icon-picker` or `ha-entity-picker` are not loaded yet (lazy Home Assistant components), the panel falls back to text fields.
+- In edit mode, mouse and touch events from bubbles are stopped from reaching swipe-navigation modules such as `hass-swipe-navigation`, otherwise a drag could change the view instead of moving the bubble.
+- Uploading the image uses Home Assistant's "Image" integration (enabled by default). It is limited to 10 MB; otherwise enter the address of a file in `/config/www/`.
+- Touch devices and the Companion app: not tested.
 
-## Dépannage
+## Troubleshooting
 
-- **« Custom element doesn't exist » ou carte vide.** La ressource n'est pas chargée. Vérifie Paramètres, Tableaux de bord, Ressources, puis fais Ctrl+F5.
-- **Les bulles ne sont pas au bon endroit.** `aspect_ratio` ne correspond pas au vrai rapport de l'image.
-- **Pas de crayon.** Le compte n'est pas administrateur, ou `editable: false` est réglé.
-- **« Écart détecté » à l'enregistrement.** La carte a changé dans le dashboard depuis le chargement de la page. Recharge la page et refais tes modifications.
-- **Impossible de glisser une bulle.** Un module de balayage capte peut-être le geste. Vérifie que tu es en mode édition (cadre en pointillés).
-- **L'image de fond ne s'affiche pas.** Le fichier n'est pas dans `/config/www/` ou l'adresse est fausse. Teste `/local/plan.png` dans le navigateur.
-- **Une action ne répond pas.** Rouvre le panneau de la bulle : un message « Pas encore appliqué » indique le champ à corriger. Pense à enregistrer ensuite.
+- **"Custom element doesn't exist" or empty card.** The resource is not loaded. Check Settings, Dashboards, Resources, then press Ctrl+F5.
+- **Bubbles are not in the right place.** `aspect_ratio` does not match the real ratio of the image.
+- **No pencil.** The account is not an administrator, or `editable: false` is set.
+- **"Écart détecté" (drift) when saving.** The card changed in the dashboard since the page loaded. Reload the page and redo your changes.
+- **Cannot drag a bubble.** A swipe module may be capturing the gesture. Check that you are in edit mode (dashed frame).
+- **Background image does not show.** The file is not in `/config/www/` or the address is wrong. Try `/local/plan.png` in the browser.
+- **An action does not respond.** Reopen the bubble panel: a "Not applied yet" message points to the field to fix. Remember to save afterwards.
 
-## Développement
+Note: the German and English translations are provided by the card itself; the list of texts lives in `TPC_STRINGS` at the top of `tile-placer-card.js`, where other languages can be added.
 
-Aucun build. Vérifie la syntaxe avec :
+## Development
+
+No build step. Check the syntax with:
 
 ```bash
 node --check tile-placer-card.js
 ```
 
-Pour publier une version : incrémente `TPC_VERSION`, crée une release GitHub contenant `tile-placer-card.js`, puis mets à jour dans HACS.
+The same check runs in CI (`.github/workflows/validate.yml`), together with the official HACS validation.
 
-## Licence
+To publish a version: bump `TPC_VERSION`, add an entry to [CHANGELOG.md](CHANGELOG.md), create a GitHub release containing `tile-placer-card.js`, then update in HACS.
+
+## Changelog
+
+Version history: [CHANGELOG.md](CHANGELOG.md).
+
+Latest: **0.9.61** — the interface is available in German and English, and follows the language of the Home Assistant profile. See [Languages](#yaml-configuration) for the `language` option.
+
+## License
 
 MIT

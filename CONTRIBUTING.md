@@ -35,7 +35,8 @@ The card is a single plain JavaScript file, `tile-placer-card.js`. There is no b
 
 - Keep each pull request focused on one change.
 - Match the style of the surrounding code (no new dependency, no build tooling).
-- Update `README.md` and `README_eng.md` when you change an option or a behaviour.
+- Update `README.md` (English, the main one) and `README_fr.md` when you change an option or a behaviour.
+- Add an entry to `CHANGELOG.md` for anything a user can notice.
 - Do not bump `TPC_VERSION` or create releases: the maintainer does that.
 - Describe how you tested the change (browser, Home Assistant version).
 
