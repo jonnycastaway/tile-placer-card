@@ -67,7 +67,7 @@ HACS déclare la ressource tout seul. Les mises à jour passent aussi par HACS.
 ### À la main
 
 1. Copie `tile-placer-card.js` dans `/config/www/`.
-2. Va dans Paramètres, Tableaux de bord, menu ⋮, **Ressources**, et ajoute `/local/tile-placer-card.js?v=0.9.60` en type **Module JavaScript**.
+2. Va dans Paramètres, Tableaux de bord, menu ⋮, **Ressources**, et ajoute `/local/tile-placer-card.js?v=0.9.61` en type **Module JavaScript**.
 3. Change la valeur de `?v=` à chaque mise à jour : Home Assistant garde `/local/` en cache très longtemps.
 
 ## Démarrage rapide
@@ -212,7 +212,10 @@ D'autres exemples sont dans [`examples/basic.yaml`](examples/basic.yaml).
 | `editable` | `false` masque le crayon (défaut `true`). Le mode édition exige de toute façon un compte administrateur. |
 | `switch_path` | Adresse d'un autre plan (ex. `/my-dashboard/0`). Ajoute un bouton en haut à gauche pour y basculer. Facultatif. |
 | `switch_label` | Texte du bouton de bascule. Facultatif. |
+| `language` | Langue de l'interface : `fr`, `de` ou `en`. Sans valeur, elle suit la langue du profil Home Assistant. Facultatif. |
 | `tiles` | Liste des bulles. |
+
+**Langues.** L'interface (barre d'outils, panneau des bulles, éditeur, messages) suit la langue du profil Home Assistant. L'allemand et l'anglais sont fournis ; tout le reste retombe sur le français, y compris tant que la carte n'a pas encore reçu l'objet `hass`. L'option `language` force une langue, par exemple pour un dashboard partagé entre plusieurs comptes.
 
 ### Options d'une bulle
 

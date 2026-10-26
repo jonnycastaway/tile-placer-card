@@ -4,7 +4,7 @@
  * déplaçables en pourcentages, éditables, sauvegardées dans la config Lovelace (mode stockage).
  * Documentation, options et limites connues : README.md. Licence MIT.
  */
-const TPC_VERSION = "0.9.60";
+const TPC_VERSION = "0.9.61";
 const HOLD_MS = 500;
 const DOUBLE_MS = 250;
 const DRAG_THRESHOLD = 4;
@@ -12,29 +12,322 @@ const ACTIVE_STATES = [
   "on", "open", "opening", "playing", "home", "unlocked", "heat", "cool",
   "heating", "cooling", "active", "detected", "running", "cleaning",
 ];
-const ACTION_TYPES = [
-  ["none", "Aucune"],
-  ["more-info", "Plus d'infos"],
-  ["toggle", "Basculer"],
-  ["call-service", "Appeler un service"],
-  ["navigate", "Naviguer"],
-  ["url", "Ouvrir une URL"],
-];
+
 const SWITCH_ON_DEFAULT = "#ffc107"; // jaune
 const SWITCH_OFF_DEFAULT = "#9e9e9e"; // gris
 const MOVING_DEFAULT = "#00bcd4"; // cyan : en mouvement
 const PARTIAL_DEFAULT = "#9c27b0"; // violet : volet entre 5 et 95 %
 const ONOFF_DOMAINS = ["switch", "light", "input_boolean", "fan", "binary_sensor", "cover"]; // entités avec couleurs allumé / éteint
-const COLOR_PRESETS = [
-  ["#ffc107", "Jaune"], ["#ff9800", "Orange"], ["#f44336", "Rouge"], ["#4caf50", "Vert"],
-  ["#2196f3", "Bleu"], ["#9c27b0", "Violet"], ["#ffffff", "Blanc"], ["#9e9e9e", "Gris"], ["#212121", "Noir"], ["#00bcd4", "Cyan"],
-];
+
 const ACTION_KEYS = ["tap_action", "double_tap_action", "hold_action"];
-const ACTION_LABELS = {
+const ACTION_LABEL_TEXT = {
   tap_action: "Action au clic",
   double_tap_action: "Action au double clic",
   hold_action: "Action à l'appui long",
 };
+
+/* ---------- langues ---------- */
+
+/*
+ * Le français est la langue d'origine : il sert de clé et de repli. Chaque autre
+ * langue n'est qu'une table « texte français -> traduction », donc une clé absente
+ * retombe simplement sur le texte d'origine.
+ * La langue suivie est celle du profil Home Assistant (`hass.language`) ; l'option
+ * `language` de la carte (de, en, fr) la remplace si elle est renseignée.
+ */
+const TPC_STRINGS = {
+  de: {
+    "Aucune": "Keine",
+    "Plus d'infos": "Mehr Informationen",
+    "Basculer": "Umschalten",
+    "Appeler un service": "Aktion ausführen",
+    "Naviguer": "Navigieren",
+    "Ouvrir une URL": "URL öffnen",
+    "Jaune": "Gelb",
+    "Orange": "Orange",
+    "Rouge": "Rot",
+    "Vert": "Grün",
+    "Bleu": "Blau",
+    "Violet": "Violett",
+    "Blanc": "Weiß",
+    "Gris": "Grau",
+    "Noir": "Schwarz",
+    "Cyan": "Türkis",
+    "Action au clic": "Aktion beim Tippen",
+    "Action au double clic": "Aktion beim Doppeltippen",
+    "Action à l'appui long": "Aktion beim Halten",
+    "Configuration invalide": "Ungültige Konfiguration",
+    "`tiles` doit être une liste": "`tiles` muss eine Liste sein",
+    "indisponible": "nicht verfügbar",
+    "tuile": "Kachel",
+    "tuile déplaçable": "verschiebbare Kachel",
+    "Clique ici pour ajouter une image de fond": "Hier klicken, um ein Hintergrundbild hinzuzufügen",
+    "Aucune image de fond.": "Kein Hintergrundbild.",
+    "Aucune bulle. Utilise le crayon puis « Nouvel appareil ».": "Keine Kacheln. Nutze den Stift und dann „Neues Gerät“.",
+    "Créer la page « Plan » en un clic": "Seite „Plan“ mit einem Klick erstellen",
+    "Modifier le plan": "Plan bearbeiten",
+    "Autre plan": "Anderer Plan",
+    "Glisser pour redimensionner": "Zum Ändern der Größe ziehen",
+    "Version de Tile Placer Card chargée": "Geladene Version der Tile Placer Card",
+    "Créer une page « Plan » dans la barre latérale, avec cette carte en plein écran ?": "Seite „Plan“ in der Seitenleiste anlegen, mit dieser Karte im Vollbild?",
+    "Création de la page impossible : {message}": "Seite konnte nicht erstellt werden: {message}",
+    "Si le dashboard « {path} » a été créé vide, supprime-le dans Paramètres, Tableaux de bord.": "Falls das Dashboard „{path}“ leer angelegt wurde, lösche es unter Einstellungen → Dashboards.",
+    "+ Nouvel appareil": "+ Neues Gerät",
+    "Enregistrement…": "Wird gespeichert…",
+    "Enregistrer": "Speichern",
+    "Image de fond…": "Hintergrundbild…",
+    "Annuler": "Abbrechen",
+    "Modifications non enregistrées.": "Nicht gespeicherte Änderungen.",
+    "Glisse les tuiles ; clique pour configurer.": "Kacheln ziehen; zum Einstellen antippen.",
+    "Choisir un fichier image…": "Bilddatei wählen…",
+    "Adresse de l'image": "Adresse des Bildes",
+    "Envoi de l'image…": "Bild wird hochgeladen…",
+    "Valider l'adresse": "Adresse übernehmen",
+    "Image de fond": "Hintergrundbild",
+    "Envoie le plan de ta maison (PNG, JPG…) : il est stocké dans Home Assistant et la carte s'adapte à ses proportions.": "Lade deinen Grundriss hoch (PNG, JPG…): er wird in Home Assistant gespeichert und die Karte passt sich seinen Proportionen an.",
+    "Ou indique l'adresse d'une image déjà présente (ex. /local/plan.png, fichier dans /config/www/) :": "Oder gib die Adresse eines bereits vorhandenen Bildes an (z. B. /local/plan.png, Datei in /config/www/):",
+    "Jeton d'accès introuvable : indique plutôt l'adresse de l'image.": "Zugangstoken nicht gefunden: Gib stattdessen die Bildadresse an.",
+    "Image trop lourde (10 Mo maximum).": "Bild zu groß (maximal 10 MB).",
+    "Envoi impossible (réseau).": "Hochladen nicht möglich (Netzwerk).",
+    "L'intégration « Image » n'est pas active : indique plutôt l'adresse de l'image.": "Die Integration „Image“ ist nicht aktiv: Gib stattdessen die Bildadresse an.",
+    "Envoi refusé (code {status}).": "Hochladen abgelehnt (Code {status}).",
+    "Réponse inattendue du serveur.": "Unerwartete Antwort des Servers.",
+    "Indique une image.": "Bitte ein Bild angeben.",
+    "Adresse refusée.": "Adresse nicht zulässig.",
+    "Abandonner les modifications non enregistrées ?": "Nicht gespeicherte Änderungen verwerfen?",
+    "Erreur du panneau : {message}": "Fehler im Einstellungsbereich: {message}",
+    "Forme de la bulle": "Form der Kachel",
+    "Rond": "Rund",
+    "Carré arrondi": "Abgerundetes Quadrat",
+    "Carré": "Quadrat",
+    "Rectangle": "Rechteck",
+    "Largeur": "Breite",
+    "Appareil": "Gerät",
+    "— Aucun : choisir une entité —": "— Keins: Entität wählen —",
+    "Liste des appareils indisponible : choisis une entité.": "Geräteliste nicht verfügbar: Entität wählen.",
+    "Affichage du libellé": "Anzeige des Namens",
+    "Au survol / sélection": "Beim Überfahren / Auswählen",
+    "Toujours": "Immer",
+    "Jamais": "Nie",
+    "Choisir une couleur": "Farbe wählen",
+    "Personnalisée…": "Eigene…",
+    "{label} (personnalisée)": "{label} (eigene)",
+    "Couleur actif": "Farbe aktiv",
+    "Couleur quand actif (allumé, ouvert)": "Farbe bei aktiv (an, offen)",
+    "Couleur inactif": "Farbe inaktiv",
+    "Couleur quand inactif (éteint, fermé)": "Farbe bei inaktiv (aus, geschlossen)",
+    "Couleur en mouvement": "Farbe bei Bewegung",
+    "Couleur en mouvement (ouverture, fermeture)": "Farbe bei Bewegung (Öffnen, Schließen)",
+    "Couleur entre 5 et 95 %": "Farbe zwischen 5 und 95 %",
+    "Couleur entre 5 et 95 % (volet)": "Farbe zwischen 5 und 95 % (Rollladen)",
+    "Les données doivent être un objet JSON": "Die Daten müssen ein JSON-Objekt sein",
+    "{action} : service au format domaine.service requis": "{action}: Aktion im Format Domäne.Aktion erforderlich",
+    "{action} : chemin requis": "{action}: Pfad erforderlich",
+    "{action} : URL requise": "{action}: URL erforderlich",
+    "Pas encore appliqué : {message}": "Noch nicht übernommen: {message}",
+    "Supprimer la bulle": "Kachel löschen",
+    "Supprimer cette bulle ?": "Diese Kachel löschen?",
+    "Fermer": "Schließen",
+    "Bulle sélectionnée": "Ausgewählte Kachel",
+    "Nom": "Name",
+    "Nom (sinon nom de l'entité)": "Name (sonst Entitätsname)",
+    "Icône": "Symbol",
+    "Entité": "Entität",
+    "Affichage du nom": "Anzeige des Namens",
+    "Forme": "Form",
+    "Taille (hauteur)": "Größe (Höhe)",
+    "Couleur de l'icône": "Symbolfarbe",
+    "Afficher l'état sous la bulle": "Zustand unter der Kachel anzeigen",
+    "Fond transparent (icône seule)": "Transparenter Hintergrund (nur Symbol)",
+    "Actions (clic, double clic, appui long)": "Aktionen (Tippen, Doppeltippen, Halten)",
+    "Par défaut (plus d'infos si entité)": "Standard (bei Entität: mehr Informationen)",
+    "Service (domaine.service)": "Aktion (Domäne.Aktion)",
+    "Données JSON": "JSON-Daten",
+    "Données (JSON, optionnel)": "Daten (JSON, optional)",
+    "Chemin": "Pfad",
+    "URL": "URL",
+    "Dashboard non identifiable depuis l'URL.": "Dashboard anhand der URL nicht erkennbar.",
+    "L'URL « /{seg} » n'est pas un dashboard Lovelace.": "Die URL „/{seg}“ ist kein Lovelace-Dashboard.",
+    "Droits administrateur requis.": "Administratorrechte erforderlich.",
+    "Ce dashboard n'a pas de configuration stockée (mode YAML ou configuration auto-générée) : enregistrement impossible.": "Dieses Dashboard hat keine gespeicherte Konfiguration (YAML-Modus oder automatisch erzeugte Konfiguration): Speichern nicht möglich.",
+    "Lecture de la configuration impossible : {message}": "Konfiguration konnte nicht gelesen werden: {message}",
+    "Écart détecté : la carte a changé dans le dashboard depuis son chargement (ou a été déplacée). Recharge la page puis refais tes modifications. Rien n'a été écrit.": "Abweichung erkannt: Die Karte wurde im Dashboard seit dem Laden geändert (oder verschoben). Lade die Seite neu und wiederhole deine Änderungen. Es wurde nichts geschrieben.",
+    "Plusieurs cartes identiques dans ce dashboard : impossible de savoir laquelle modifier. Rien n'a été écrit.": "Mehrere identische Karten in diesem Dashboard: Es lässt sich nicht feststellen, welche geändert werden soll. Es wurde nichts geschrieben.",
+    "Écriture refusée : {message}": "Schreiben abgelehnt: {message}",
+    "Titre (facultatif)": "Titel (optional)",
+    "Image de fond (ex. /local/plan.png)": "Hintergrundbild (z. B. /local/plan.png)",
+    "Proportions (facultatif)": "Seitenverhältnis (optional)",
+    "Agrandir à la hauteur de l'écran": "Auf Bildschirmhöhe vergrößern",
+    "Affichage des noms": "Anzeige der Namen",
+    "Autoriser la modification sur le plan": "Bearbeiten im Plan erlauben",
+    "Lien vers un autre plan (facultatif)": "Link zu einem anderen Plan (optional)",
+    "Texte du bouton (facultatif)": "Text der Schaltfläche (optional)",
+    "Place l'image dans /config/www/ : le fichier plan.png s'écrit /local/plan.png.": "Lege das Bild in /config/www/ ab: die Datei plan.png heißt dann /local/plan.png.",
+    "Laisse vide : les proportions sont lues sur l'image. Sinon, ex. 1200:896.": "Leer lassen: das Seitenverhältnis wird aus dem Bild gelesen. Sonst z. B. 1200:896.",
+    "Conseillé dans une vue de type « Panneau ».": "Empfohlen in einer Ansicht vom Typ „Panel“.",
+    "Ajoute un bouton en haut à gauche. Ex. /my-dashboard/0 : seul le dernier mot de l'adresse change selon ton dashboard.": "Fügt oben links eine Schaltfläche hinzu. Z. B. /my-dashboard/0: nur das letzte Wort der Adresse hängt vom Dashboard ab.",
+    "Au survol": "Beim Überfahren",
+    "Les bulles se placent directement sur le plan : clique sur le crayon de la carte, puis « + Nouvel appareil ».": "Die Kacheln werden direkt im Plan platziert: Klicke auf den Stift der Karte und dann auf „+ Neues Gerät“.",
+  },
+  en: {
+    "Aucune": "None",
+    "Plus d'infos": "More info",
+    "Basculer": "Toggle",
+    "Appeler un service": "Perform action",
+    "Naviguer": "Navigate",
+    "Ouvrir une URL": "Open URL",
+    "Jaune": "Yellow",
+    "Orange": "Orange",
+    "Rouge": "Red",
+    "Vert": "Green",
+    "Bleu": "Blue",
+    "Violet": "Purple",
+    "Blanc": "White",
+    "Gris": "Gray",
+    "Noir": "Black",
+    "Cyan": "Cyan",
+    "Action au clic": "Tap action",
+    "Action au double clic": "Double tap action",
+    "Action à l'appui long": "Hold action",
+    "Configuration invalide": "Invalid configuration",
+    "`tiles` doit être une liste": "`tiles` must be a list",
+    "indisponible": "unavailable",
+    "tuile": "tile",
+    "tuile déplaçable": "movable tile",
+    "Clique ici pour ajouter une image de fond": "Click here to add a background image",
+    "Aucune image de fond.": "No background image.",
+    "Aucune bulle. Utilise le crayon puis « Nouvel appareil ».": "No tiles. Use the pencil, then “New device”.",
+    "Créer la page « Plan » en un clic": "Create the “Plan” page in one click",
+    "Modifier le plan": "Edit the plan",
+    "Autre plan": "Other plan",
+    "Glisser pour redimensionner": "Drag to resize",
+    "Version de Tile Placer Card chargée": "Loaded Tile Placer Card version",
+    "Créer une page « Plan » dans la barre latérale, avec cette carte en plein écran ?": "Create a “Plan” page in the sidebar with this card in full screen?",
+    "Création de la page impossible : {message}": "Cannot create the page: {message}",
+    "Si le dashboard « {path} » a été créé vide, supprime-le dans Paramètres, Tableaux de bord.": "If the “{path}” dashboard was created empty, delete it in Settings → Dashboards.",
+    "+ Nouvel appareil": "+ New device",
+    "Enregistrement…": "Saving…",
+    "Enregistrer": "Save",
+    "Image de fond…": "Background image…",
+    "Annuler": "Cancel",
+    "Modifications non enregistrées.": "Unsaved changes.",
+    "Glisse les tuiles ; clique pour configurer.": "Drag the tiles; click to configure.",
+    "Choisir un fichier image…": "Choose an image file…",
+    "Adresse de l'image": "Image address",
+    "Envoi de l'image…": "Uploading image…",
+    "Valider l'adresse": "Use this address",
+    "Image de fond": "Background image",
+    "Envoie le plan de ta maison (PNG, JPG…) : il est stocké dans Home Assistant et la carte s'adapte à ses proportions.": "Upload your floor plan (PNG, JPG…): it is stored in Home Assistant and the card adapts to its proportions.",
+    "Ou indique l'adresse d'une image déjà présente (ex. /local/plan.png, fichier dans /config/www/) :": "Or enter the address of an image that is already there (e.g. /local/plan.png, a file in /config/www/):",
+    "Jeton d'accès introuvable : indique plutôt l'adresse de l'image.": "Access token not found: enter the image address instead.",
+    "Image trop lourde (10 Mo maximum).": "Image too large (10 MB maximum).",
+    "Envoi impossible (réseau).": "Upload failed (network).",
+    "L'intégration « Image » n'est pas active : indique plutôt l'adresse de l'image.": "The “Image” integration is not active: enter the image address instead.",
+    "Envoi refusé (code {status}).": "Upload rejected (code {status}).",
+    "Réponse inattendue du serveur.": "Unexpected response from the server.",
+    "Indique une image.": "Enter an image.",
+    "Adresse refusée.": "Address not allowed.",
+    "Abandonner les modifications non enregistrées ?": "Discard unsaved changes?",
+    "Erreur du panneau : {message}": "Settings panel error: {message}",
+    "Forme de la bulle": "Tile shape",
+    "Rond": "Round",
+    "Carré arrondi": "Rounded square",
+    "Carré": "Square",
+    "Rectangle": "Rectangle",
+    "Largeur": "Width",
+    "Appareil": "Device",
+    "— Aucun : choisir une entité —": "— None: choose an entity —",
+    "Liste des appareils indisponible : choisis une entité.": "Device list unavailable: choose an entity.",
+    "Affichage du libellé": "Name display",
+    "Au survol / sélection": "On hover / selection",
+    "Toujours": "Always",
+    "Jamais": "Never",
+    "Choisir une couleur": "Choose a color",
+    "Personnalisée…": "Custom…",
+    "{label} (personnalisée)": "{label} (custom)",
+    "Couleur actif": "Active color",
+    "Couleur quand actif (allumé, ouvert)": "Color when active (on, open)",
+    "Couleur inactif": "Inactive color",
+    "Couleur quand inactif (éteint, fermé)": "Color when inactive (off, closed)",
+    "Couleur en mouvement": "Moving color",
+    "Couleur en mouvement (ouverture, fermeture)": "Color while moving (opening, closing)",
+    "Couleur entre 5 et 95 %": "Color between 5 and 95%",
+    "Couleur entre 5 et 95 % (volet)": "Color between 5 and 95% (cover)",
+    "Les données doivent être un objet JSON": "The data must be a JSON object",
+    "{action} : service au format domaine.service requis": "{action}: action must be in the domain.action format",
+    "{action} : chemin requis": "{action}: path required",
+    "{action} : URL requise": "{action}: URL required",
+    "Pas encore appliqué : {message}": "Not applied yet: {message}",
+    "Supprimer la bulle": "Delete tile",
+    "Supprimer cette bulle ?": "Delete this tile?",
+    "Fermer": "Close",
+    "Bulle sélectionnée": "Selected tile",
+    "Nom": "Name",
+    "Nom (sinon nom de l'entité)": "Name (otherwise the entity name)",
+    "Icône": "Icon",
+    "Entité": "Entity",
+    "Affichage du nom": "Name display",
+    "Forme": "Shape",
+    "Taille (hauteur)": "Size (height)",
+    "Couleur de l'icône": "Icon color",
+    "Afficher l'état sous la bulle": "Show the state below the tile",
+    "Fond transparent (icône seule)": "Transparent background (icon only)",
+    "Actions (clic, double clic, appui long)": "Actions (tap, double tap, hold)",
+    "Par défaut (plus d'infos si entité)": "Default (more info if an entity)",
+    "Service (domaine.service)": "Action (domain.action)",
+    "Données JSON": "JSON data",
+    "Données (JSON, optionnel)": "Data (JSON, optional)",
+    "Chemin": "Path",
+    "URL": "URL",
+    "Dashboard non identifiable depuis l'URL.": "Cannot identify the dashboard from the URL.",
+    "L'URL « /{seg} » n'est pas un dashboard Lovelace.": "The URL “/{seg}” is not a Lovelace dashboard.",
+    "Droits administrateur requis.": "Administrator rights required.",
+    "Ce dashboard n'a pas de configuration stockée (mode YAML ou configuration auto-générée) : enregistrement impossible.": "This dashboard has no stored configuration (YAML mode or auto-generated configuration): cannot save.",
+    "Lecture de la configuration impossible : {message}": "Cannot read the configuration: {message}",
+    "Écart détecté : la carte a changé dans le dashboard depuis son chargement (ou a été déplacée). Recharge la page puis refais tes modifications. Rien n'a été écrit.": "Mismatch detected: the card changed in the dashboard since it was loaded (or was moved). Reload the page and redo your changes. Nothing was written.",
+    "Plusieurs cartes identiques dans ce dashboard : impossible de savoir laquelle modifier. Rien n'a été écrit.": "Several identical cards in this dashboard: cannot tell which one to change. Nothing was written.",
+    "Écriture refusée : {message}": "Write rejected: {message}",
+    "Titre (facultatif)": "Title (optional)",
+    "Image de fond (ex. /local/plan.png)": "Background image (e.g. /local/plan.png)",
+    "Proportions (facultatif)": "Aspect ratio (optional)",
+    "Agrandir à la hauteur de l'écran": "Enlarge to screen height",
+    "Affichage des noms": "Name display",
+    "Autoriser la modification sur le plan": "Allow editing on the plan",
+    "Lien vers un autre plan (facultatif)": "Link to another plan (optional)",
+    "Texte du bouton (facultatif)": "Button text (optional)",
+    "Place l'image dans /config/www/ : le fichier plan.png s'écrit /local/plan.png.": "Put the image in /config/www/: the file plan.png is addressed as /local/plan.png.",
+    "Laisse vide : les proportions sont lues sur l'image. Sinon, ex. 1200:896.": "Leave empty: the aspect ratio is read from the image. Otherwise, e.g. 1200:896.",
+    "Conseillé dans une vue de type « Panneau ».": "Recommended in a panel-type view.",
+    "Ajoute un bouton en haut à gauche. Ex. /my-dashboard/0 : seul le dernier mot de l'adresse change selon ton dashboard.": "Adds a button at the top left. E.g. /my-dashboard/0: only the last word of the address depends on your dashboard.",
+    "Au survol": "On hover",
+    "Les bulles se placent directement sur le plan : clique sur le crayon de la carte, puis « + Nouvel appareil ».": "Tiles are placed directly on the plan: click the card's pencil, then “+ New device”.",
+  },
+};
+
+/* « de-AT » / « en_GB » -> langue de base disposant d'une table, sinon null. */
+function tpcBaseLang(code) {
+  const base = String(code || "").toLowerCase().split(/[-_]/)[0];
+  return Object.prototype.hasOwnProperty.call(TPC_STRINGS, base) ? base : null;
+}
+
+/* Langue effective : option de la carte, sinon langue de l'interface, sinon français. */
+function tpcResolveLang(hass, override) {
+  const forced = tpcBaseLang(override);
+  if (forced) return forced;
+  if (String(override || "").toLowerCase().split(/[-_]/)[0] === "fr") return "fr"; // français forcé
+  return tpcBaseLang(hass && hass.language) || "fr";
+}
+
+/* Traduit un texte source ; les {placeholders} viennent de `values`. */
+function tpcT(lang, source, values) {
+  const table = TPC_STRINGS[lang];
+  let out = (table && table[source]) || source;
+  if (values) {
+    out = out.replace(/\{(\w+)\}/g, (m, key) =>
+      (values[key] === undefined || values[key] === null ? m : String(values[key])));
+  }
+  return out;
+}
 
 /* ---------- utilitaires ---------- */
 
@@ -220,6 +513,7 @@ class TilePlacerCard extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
+    this._langBuilt = null; // langue utilisée pour le rendu en cours
     this._config = null;
     this._baseline = null; // JSON stable de la config telle que reçue / dernièrement enregistrée
     this._tiles = [];
@@ -243,10 +537,41 @@ class TilePlacerCard extends HTMLElement {
     return document.createElement("tile-placer-card-editor");
   }
 
+  /* Langue de la carte : option `language`, sinon langue du profil Home Assistant, sinon français. */
+  get _lang() {
+    return tpcResolveLang(this._hass, this._config && this._config.language);
+  }
+
+  _t(source, values) {
+    return tpcT(this._lang, source, values);
+  }
+
+  _actionTypes() {
+    return [
+      ["none", this._t("Aucune")],
+      ["more-info", this._t("Plus d'infos")],
+      ["toggle", this._t("Basculer")],
+      ["call-service", this._t("Appeler un service")],
+      ["navigate", this._t("Naviguer")],
+      ["url", this._t("Ouvrir une URL")],
+    ];
+  }
+
+  _colorPresets() {
+    return [
+      ["#ffc107", this._t("Jaune")], ["#ff9800", this._t("Orange")], ["#f44336", this._t("Rouge")], ["#4caf50", this._t("Vert")],
+      ["#2196f3", this._t("Bleu")], ["#9c27b0", this._t("Violet")], ["#ffffff", this._t("Blanc")], ["#9e9e9e", this._t("Gris")], ["#212121", this._t("Noir")], ["#00bcd4", this._t("Cyan")],
+    ];
+  }
+
+  _actionLabel(key) {
+    return this._t(ACTION_LABEL_TEXT[key] || key);
+  }
+
   setConfig(config) {
-    if (!config || typeof config !== "object") throw new Error("Configuration invalide");
+    if (!config || typeof config !== "object") throw new Error(this._t("Configuration invalide"));
     if (config.tiles !== undefined && !Array.isArray(config.tiles)) {
-      throw new Error("`tiles` doit être une liste");
+      throw new Error(this._t("`tiles` doit être une liste"));
     }
     const key = stableStringify(config);
     if (this._editing && this._dirty && key === this._baseline) return; // ne pas écraser l'édition en cours
@@ -261,10 +586,14 @@ class TilePlacerCard extends HTMLElement {
 
   set hass(hass) {
     this._hass = hass;
-    if (this._built) {
-      this._updatePencil();
-      this._updateTiles();
+    if (!this._built) return;
+    // Changement de langue dans le profil (ou arrivée du premier hass) : tout le texte est reconstruit.
+    if (this._lang !== this._langBuilt) {
+      this._build();
+      return;
     }
+    this._updatePencil();
+    this._updateTiles();
   }
 
   getCardSize() {
@@ -317,14 +646,14 @@ class TilePlacerCard extends HTMLElement {
     stage.append(this._emptyHint);
 
     this._setupBtn = h("button", {
-      class: "btn primary setup", type: "button", text: "Créer la page « Plan » en un clic",
+      class: "btn primary setup", type: "button", text: this._t("Créer la page « Plan » en un clic"),
       onclick: () => this._createPage(),
     });
     this._setupBtn.style.display = "none";
     stage.append(this._setupBtn);
 
     this._pencil = h("button", {
-      class: "pencil", type: "button", title: "Modifier le plan", "aria-label": "Modifier le plan",
+      class: "pencil", type: "button", title: this._t("Modifier le plan"), "aria-label": this._t("Modifier le plan"),
       onclick: () => this._toggleEdit(true),
     });
     this._pencil.append(this._mkIcon("mdi:pencil"));
@@ -333,7 +662,7 @@ class TilePlacerCard extends HTMLElement {
     // Bouton de bascule vers un autre plan (ex. l'ancien picture-elements) : adresse libre, réglée par l'utilisateur.
     this._switchBtn = h("button", {
       class: "switch", type: "button",
-      title: this._config.switch_label || "Autre plan", "aria-label": this._config.switch_label || "Autre plan",
+      title: this._config.switch_label || this._t("Autre plan"), "aria-label": this._config.switch_label || this._t("Autre plan"),
       onclick: () => this._goSwitch(),
     });
     this._switchBtn.append(this._mkIcon("mdi:swap-horizontal"));
@@ -349,6 +678,7 @@ class TilePlacerCard extends HTMLElement {
     card.append(stage, this._pencil, this._switchBtn, this._toolbar);
     root.append(card);
     this._built = true;
+    this._langBuilt = this._lang;
     this._applyEditState();
     this._updatePencil();
     this._updateTiles();
@@ -375,7 +705,7 @@ class TilePlacerCard extends HTMLElement {
     const el = h("div", { class: "tile", role: "button", tabindex: "0" });
     const bubble = h("div", { class: "bubble" });
     const iconHost = h("div", { style: "display:flex" });
-    const rs = h("div", { class: "rs", title: "Glisser pour redimensionner" });
+    const rs = h("div", { class: "rs", title: this._t("Glisser pour redimensionner") });
     bubble.append(iconHost, rs);
     const label = h("div", { class: "label" });
     const state = h("div", { class: "state" });
@@ -454,7 +784,7 @@ class TilePlacerCard extends HTMLElement {
 
   _stateText(t, s) {
     if (!t.entity) return "";
-    if (!s) return "indisponible";
+    if (!s) return this._t("indisponible");
     const hass = this._hass;
     if (hass && typeof hass.formatEntityState === "function") {
       try { return hass.formatEntityState(s); } catch (_) { /* repli */ }
@@ -490,7 +820,7 @@ class TilePlacerCard extends HTMLElement {
       e.state.style.display = txt ? "" : "none";
 
       const aria = [name, txt].filter(Boolean).join(", ");
-      e.root.setAttribute("aria-label", aria || "tuile");
+      e.root.setAttribute("aria-label", aria || this._t("tuile"));
 
       // icône
       const useStateIcon = !t.icon && s && customElements.get("ha-state-icon");
@@ -524,9 +854,9 @@ class TilePlacerCard extends HTMLElement {
       const canBg = noBg && this._canAddBackground();
       this._emptyHint.classList.toggle("clickable", canBg);
       this._emptyHint.textContent = canBg
-        ? "Clique ici pour ajouter une image de fond"
-        : noBg ? "Aucune image de fond."
-          : "Aucune bulle. Utilise le crayon puis « Nouvel appareil ».";
+        ? this._t("Clique ici pour ajouter une image de fond")
+        : noBg ? this._t("Aucune image de fond.")
+          : this._t("Aucune bulle. Utilise le crayon puis « Nouvel appareil ».");
     }
     if (this._setupBtn) {
       // Proposé seulement sur une carte neuve (sans bulle, hors page plein écran) pour ne pas se répéter sur la page créée.
@@ -546,7 +876,7 @@ class TilePlacerCard extends HTMLElement {
 
   async _createPage() {
     if (!this._canEdit()) return;
-    if (!confirm("Créer une page « Plan » dans la barre latérale, avec cette carte en plein écran ?")) return;
+    if (!confirm(this._t("Créer une page « Plan » dans la barre latérale, avec cette carte en plein écran ?"))) return;
     this._setupBtn.disabled = true;
     let path = null;
     try {
@@ -566,9 +896,13 @@ class TilePlacerCard extends HTMLElement {
       location.assign(`/${path}`);
     } catch (err) {
       this._setupBtn.disabled = false;
-      alert("Création de la page impossible : " + (err && err.message ? err.message : JSON.stringify(err))
-        + (path ? `
-Si le dashboard « ${path} » a été créé vide, supprime-le dans Paramètres, Tableaux de bord.` : ""));
+      const reason = this._t("Création de la page impossible : {message}", {
+        message: err && err.message ? err.message : JSON.stringify(err),
+      });
+      const hint = path
+        ? "\n" + this._t("Si le dashboard « {path} » a été créé vide, supprime-le dans Paramètres, Tableaux de bord.", { path })
+        : "";
+      alert(reason + hint);
     }
   }
 
@@ -587,7 +921,7 @@ Si le dashboard « ${path} » a été créé vide, supprime-le dans Paramètres,
     this._stage.classList.toggle("grid", this._editing);
     if (!this._editing) { this._selectedId = null; this._renderPanel(); }
     for (const e of this._els.values()) {
-      e.root.setAttribute("aria-roledescription", this._editing ? "tuile déplaçable" : "");
+      e.root.setAttribute("aria-roledescription", this._editing ? this._t("tuile déplaçable") : "");
     }
     this._renderToolbar();
   }
@@ -597,19 +931,19 @@ Si le dashboard « ${path} » a été créé vide, supprime-le dans Paramètres,
     tb.replaceChildren();
     if (!this._editing) { tb.style.display = "none"; return; }
     tb.style.display = "";
-    const add = h("button", { class: "btn", type: "button", text: "+ Nouvel appareil", onclick: () => this._addTile() });
+    const add = h("button", { class: "btn", type: "button", text: this._t("+ Nouvel appareil"), onclick: () => this._addTile() });
     const save = h("button", {
-      class: "btn primary", type: "button", text: this._saving ? "Enregistrement…" : "Enregistrer",
+      class: "btn primary", type: "button", text: this._saving ? this._t("Enregistrement…") : this._t("Enregistrer"),
       onclick: () => this._save(),
     });
     save.disabled = this._saving || !this._dirty;
-    const bg = h("button", { class: "btn", type: "button", text: "Image de fond…", onclick: () => this._openBackgroundDialog() });
-    const cancel = h("button", { class: "btn", type: "button", text: "Annuler", onclick: () => this._cancelEdit() });
+    const bg = h("button", { class: "btn", type: "button", text: this._t("Image de fond…"), onclick: () => this._openBackgroundDialog() });
+    const cancel = h("button", { class: "btn", type: "button", text: this._t("Annuler"), onclick: () => this._cancelEdit() });
     cancel.disabled = this._saving;
     const msg = h("div", { class: "msg" + (this._msg ? " " + this._msg.kind : ""), role: "status", "aria-live": "polite" });
-    msg.textContent = this._msg ? this._msg.text : (this._dirty ? "Modifications non enregistrées." : "Glisse les tuiles ; clique pour configurer.");
+    msg.textContent = this._msg ? this._msg.text : (this._dirty ? this._t("Modifications non enregistrées.") : this._t("Glisse les tuiles ; clique pour configurer."));
     // version visible : repère immédiat d'un ancien fichier resté en cache sur un appareil
-    const ver = h("span", { class: "ver", text: "v" + TPC_VERSION, title: "Version de Tile Placer Card chargée" });
+    const ver = h("span", { class: "ver", text: "v" + TPC_VERSION, title: this._t("Version de Tile Placer Card chargée") });
     tb.append(add, bg, save, cancel, msg, ver);
   }
 
@@ -624,13 +958,13 @@ Si le dashboard « ${path} » a été créé vide, supprime-le dans Paramètres,
     const status = h("div", { class: "status", role: "status", "aria-live": "polite" });
     const say = (kind, text) => { status.className = "status" + (kind ? " " + kind : ""); status.textContent = text; };
     const file = h("input", { type: "file", accept: "image/*", style: "display:none" });
-    const pick = h("button", { class: "btn primary", type: "button", text: "Choisir un fichier image…", onclick: () => file.click() });
-    const url = h("input", { type: "text", placeholder: "/local/plan.png", "aria-label": "Adresse de l'image" });
+    const pick = h("button", { class: "btn primary", type: "button", text: this._t("Choisir un fichier image…"), onclick: () => file.click() });
+    const url = h("input", { type: "text", placeholder: "/local/plan.png", "aria-label": this._t("Adresse de l'image") });
     url.value = this._config.background || "";
     const busy = (on) => { pick.disabled = on; ok.disabled = on; cancel.disabled = on; };
     const apply = async (value) => {
       busy(true);
-      say("", "Enregistrement…");
+      say("", this._t("Enregistrement…"));
       const err = await this._applyBackground(value);
       if (err) { busy(false); say("err", err); } else close();
     };
@@ -638,7 +972,7 @@ Si le dashboard « ${path} » a été créé vide, supprime-le dans Paramètres,
       const f = file.files && file.files[0];
       if (!f) return;
       busy(true);
-      say("", "Envoi de l'image…");
+      say("", this._t("Envoi de l'image…"));
       try {
         await apply(await this._uploadImage(f));
       } catch (e) {
@@ -646,14 +980,14 @@ Si le dashboard « ${path} » a été créé vide, supprime-le dans Paramètres,
         say("err", e && e.message ? e.message : String(e));
       }
     });
-    const ok = h("button", { class: "btn", type: "button", text: "Valider l'adresse", onclick: () => apply(url.value) });
-    const cancel = h("button", { class: "btn", type: "button", text: "Annuler", onclick: close });
-    const dlg = h("div", { class: "bgdlg", role: "dialog", "aria-label": "Image de fond" }, [
+    const ok = h("button", { class: "btn", type: "button", text: this._t("Valider l'adresse"), onclick: () => apply(url.value) });
+    const cancel = h("button", { class: "btn", type: "button", text: this._t("Annuler"), onclick: close });
+    const dlg = h("div", { class: "bgdlg", role: "dialog", "aria-label": this._t("Image de fond") }, [
       h("div", { class: "box" }, [
-        h("h3", { text: "Image de fond" }),
-        h("p", { text: "Envoie le plan de ta maison (PNG, JPG…) : il est stocké dans Home Assistant et la carte s'adapte à ses proportions." }),
+        h("h3", { text: this._t("Image de fond") }),
+        h("p", { text: this._t("Envoie le plan de ta maison (PNG, JPG…) : il est stocké dans Home Assistant et la carte s'adapte à ses proportions.") }),
         h("div", { class: "rowb" }, [pick, file]),
-        h("p", { text: "Ou indique l'adresse d'une image déjà présente (ex. /local/plan.png, fichier dans /config/www/) :" }),
+        h("p", { text: this._t("Ou indique l'adresse d'une image déjà présente (ex. /local/plan.png, fichier dans /config/www/) :") }),
         url,
         h("div", { class: "rowb" }, [ok, cancel]),
         status,
@@ -666,28 +1000,28 @@ Si le dashboard « ${path} » a été créé vide, supprime-le dans Paramètres,
 
   async _uploadImage(file) {
     const tok = this._hass && this._hass.auth && this._hass.auth.data && this._hass.auth.data.access_token;
-    if (!tok) throw new Error("Jeton d'accès introuvable : indique plutôt l'adresse de l'image.");
-    if (file.size > 10 * 1024 * 1024) throw new Error("Image trop lourde (10 Mo maximum).");
+    if (!tok) throw new Error(this._t("Jeton d'accès introuvable : indique plutôt l'adresse de l'image."));
+    if (file.size > 10 * 1024 * 1024) throw new Error(this._t("Image trop lourde (10 Mo maximum)."));
     const fd = new FormData();
     fd.append("file", file);
     let r;
     try {
       r = await fetch("/api/image/upload", { method: "POST", headers: { Authorization: `Bearer ${tok}` }, body: fd });
     } catch (_) {
-      throw new Error("Envoi impossible (réseau).");
+      throw new Error(this._t("Envoi impossible (réseau)."));
     }
-    if (r.status === 404) throw new Error("L'intégration « Image » n'est pas active : indique plutôt l'adresse de l'image.");
-    if (!r.ok) throw new Error(`Envoi refusé (code ${r.status}).`);
+    if (r.status === 404) throw new Error(this._t("L'intégration « Image » n'est pas active : indique plutôt l'adresse de l'image."));
+    if (!r.ok) throw new Error(this._t("Envoi refusé (code {status}).", { status: r.status }));
     const j = await r.json();
-    if (!j || !j.id) throw new Error("Réponse inattendue du serveur.");
+    if (!j || !j.id) throw new Error(this._t("Réponse inattendue du serveur."));
     return `/api/image/serve/${j.id}/original`;
   }
 
   /* Renvoie un message d'erreur, ou null si tout est bon. En mode édition, la modification attend « Enregistrer ». */
   async _applyBackground(value) {
     const val = String(value || "").trim();
-    if (!val) return "Indique une image.";
-    if (/^\s*(javascript|data|vbscript):/i.test(val)) return "Adresse refusée.";
+    if (!val) return this._t("Indique une image.");
+    if (/^\s*(javascript|data|vbscript):/i.test(val)) return this._t("Adresse refusée.");
     if (this._editing) {
       this._config.background = val;
       this._build();
@@ -720,7 +1054,7 @@ Si le dashboard « ${path} » a été créé vide, supprime-le dans Paramètres,
   }
 
   _cancelEdit() {
-    if (this._dirty && !confirm("Abandonner les modifications non enregistrées ?")) return;
+    if (this._dirty && !confirm(this._t("Abandonner les modifications non enregistrées ?"))) return;
     this._config = JSON.parse(this._baseline); // annule aussi un changement d'image de fond
     this._tiles = (this._config.tiles || []).map((t) => ({ ...clone(t), id: t.id || newId() }));
     this._editing = false;
@@ -818,7 +1152,10 @@ Si le dashboard « ${path} » a été créé vide, supprime-le dans Paramètres,
       console.error("tile-placer-card: panneau", err);
       if (this._panel) {
         this._panel.style.display = "block";
-        this._panel.replaceChildren(h("div", { class: "err", text: "Erreur du panneau : " + (err && err.message ? err.message : String(err)) }));
+        this._panel.replaceChildren(h("div", {
+          class: "err",
+          text: this._t("Erreur du panneau : {message}", { message: err && err.message ? err.message : String(err) }),
+        }));
       }
     }
   }
@@ -893,8 +1230,8 @@ Si le dashboard « ${path} » a été créé vide, supprime-le dans Paramètres,
       this._live(tile, () => { tile.size = Number(size.value); });
     });
 
-    const shape = h("select", { "aria-label": "Forme de la bulle" });
-    for (const [v, l] of [["circle", "Rond"], ["rounded", "Carré arrondi"], ["square", "Carré"], ["rectangle", "Rectangle"]]) {
+    const shape = h("select", { "aria-label": this._t("Forme de la bulle") });
+    for (const [v, l] of [["circle", this._t("Rond")], ["rounded", this._t("Carré arrondi")], ["square", this._t("Carré")], ["rectangle", this._t("Rectangle")]]) {
       const o = h("option", { value: v, text: l });
       if ((tile.shape || "circle") === v) o.selected = true;
       shape.append(o);
@@ -902,7 +1239,7 @@ Si le dashboard « ${path} » a été créé vide, supprime-le dans Paramètres,
     const width = h("input", { type: "range", min: "20", max: "400", step: "2" });
     width.value = tile.width || Math.round((tile.size || 36) * 1.6);
     const widthVal = h("span", { text: `${width.value} px` });
-    const widthRow = lbl("Largeur", h("div", { class: "inline" }, [width, widthVal]));
+    const widthRow = lbl(this._t("Largeur"), h("div", { class: "inline" }, [width, widthVal]));
     widthRow.style.display = tile.shape === "rectangle" ? "" : "none";
     width.addEventListener("input", () => {
       widthVal.textContent = `${width.value} px`;
@@ -922,8 +1259,8 @@ Si le dashboard « ${path} » a été créé vide, supprime-le dans Paramètres,
     const devices = this._deviceList();
     let devCtl;
     if (devices.length) {
-      devCtl = h("select", { "aria-label": "Appareil" });
-      devCtl.append(h("option", { value: "", text: "— Aucun : choisir une entité —" }));
+      devCtl = h("select", { "aria-label": this._t("Appareil") });
+      devCtl.append(h("option", { value: "", text: this._t("— Aucun : choisir une entité —") }));
       for (const d of devices) {
         const o = h("option", { value: d.id, text: d.label });
         if (d.id === curDev) o.selected = true;
@@ -931,11 +1268,11 @@ Si le dashboard « ${path} » a été créé vide, supprime-le dans Paramètres,
       }
       devCtl.addEventListener("change", () => this._pickDevice(tile, devCtl.value));
     } else {
-      devCtl = h("div", { class: "hint", text: "Liste des appareils indisponible : choisis une entité." });
+      devCtl = h("div", { class: "hint", text: this._t("Liste des appareils indisponible : choisis une entité.") });
     }
 
-    const mode = h("select", { "aria-label": "Affichage du libellé" });
-    for (const [v, l] of [["hover", "Au survol / sélection"], ["always", "Toujours"], ["never", "Jamais"]]) {
+    const mode = h("select", { "aria-label": this._t("Affichage du libellé") });
+    for (const [v, l] of [["hover", this._t("Au survol / sélection")], ["always", this._t("Toujours")], ["never", this._t("Jamais")]]) {
       const o = h("option", { value: v, text: l });
       if ((tile.show_name === false ? "never" : (tile.label_mode || this._config.label_mode || "hover")) === v) o.selected = true;
       mode.append(o);
@@ -943,7 +1280,7 @@ Si le dashboard « ${path} » a été créé vide, supprime-le dans Paramètres,
     mode.addEventListener("change", () => this._live(tile, () => { delete tile.show_name; tile.label_mode = mode.value; }));
 
     const colorText = text(tile.color, (v) => this._live(tile, () => { tile.color = v.trim(); }), { placeholder: "#ffa500 ou var(--primary-color)" });
-    const colorPick = h("input", { type: "color", "aria-label": "Choisir une couleur" });
+    const colorPick = h("input", { type: "color", "aria-label": this._t("Choisir une couleur") });
     colorPick.value = /^#[0-9a-f]{6}$/i.test(tile.color || "") ? tile.color : "#ffa500";
     colorPick.addEventListener("input", () => { colorText.value = colorPick.value; this._live(tile, () => { tile.color = colorPick.value; }); });
 
@@ -951,14 +1288,14 @@ Si le dashboard « ${path} » a été créé vide, supprime-le dans Paramètres,
     const isHex = (v) => /^#[0-9a-f]{6}$/i.test(v || "");
     const colorChooser = (label, key, def) => {
       const cur = String(tile[key] || def);
-      const preset = COLOR_PRESETS.find(([v]) => v === cur.toLowerCase());
+      const preset = this._colorPresets().find(([v]) => v === cur.toLowerCase());
       const sel = h("select", { "aria-label": label });
-      for (const [v, l] of [...COLOR_PRESETS, ["custom", "Personnalisée…"]]) {
+      for (const [v, l] of [...this._colorPresets(), ["custom", this._t("Personnalisée…")]]) {
         const o = h("option", { value: v, text: l });
         if (preset ? preset[0] === v : v === "custom") o.selected = true;
         sel.append(o);
       }
-      const pick = h("input", { type: "color", "aria-label": label + " (personnalisée)" });
+      const pick = h("input", { type: "color", "aria-label": this._t("{label} (personnalisée)", { label }) });
       pick.value = isHex(cur) ? cur : def;
       pick.style.display = preset ? "none" : "";
       const set = (v) => this._live(tile, () => { if (v.toLowerCase() === def) delete tile[key]; else tile[key] = v; });
@@ -970,10 +1307,10 @@ Si le dashboard « ${path} » a été créé vide, supprime-le dans Paramètres,
       return h("div", { class: "inline" }, [sel, pick]);
     };
     const cd = this._colorDefaults(tile.entity);
-    const onRow = lbl("Couleur quand actif (allumé, ouvert)", colorChooser("Couleur actif", "color_on", cd.on));
-    const offRow = lbl("Couleur quand inactif (éteint, fermé)", colorChooser("Couleur inactif", "color_off", cd.off));
-    const movingRow = lbl("Couleur en mouvement (ouverture, fermeture)", colorChooser("Couleur en mouvement", "color_moving", cd.moving));
-    const partialRow = lbl("Couleur entre 5 et 95 % (volet)", colorChooser("Couleur entre 5 et 95 %", "color_partial", cd.partial));
+    const onRow = lbl(this._t("Couleur quand actif (allumé, ouvert)"), colorChooser(this._t("Couleur actif"), "color_on", cd.on));
+    const offRow = lbl(this._t("Couleur quand inactif (éteint, fermé)"), colorChooser(this._t("Couleur inactif"), "color_off", cd.off));
+    const movingRow = lbl(this._t("Couleur en mouvement (ouverture, fermeture)"), colorChooser(this._t("Couleur en mouvement"), "color_moving", cd.moving));
+    const partialRow = lbl(this._t("Couleur entre 5 et 95 % (volet)"), colorChooser(this._t("Couleur entre 5 et 95 %"), "color_partial", cd.partial));
     syncSwitch = () => {
       const sw = usesOnOffColors(tile.entity);
       const cover = String(tile.entity || "").split(".")[0] === "cover";
@@ -998,19 +1335,19 @@ Si le dashboard « ${path} » a été créé vide, supprime-le dans Paramètres,
           if (a.action === "call-service") {
             if (txt) {
               const obj = JSON.parse(txt);
-              if (obj === null || typeof obj !== "object" || Array.isArray(obj)) throw new Error("Les données doivent être un objet JSON");
+              if (obj === null || typeof obj !== "object" || Array.isArray(obj)) throw new Error(this._t("Les données doivent être un objet JSON"));
               a.data = obj;
             } else delete a.data;
             if (!(a.service && /^[a-z0-9_]+\.[a-z0-9_]+$/i.test(a.service))) {
-              throw new Error(`${ACTION_LABELS[key]} : service au format domaine.service requis`);
+              throw new Error(this._t("{action} : service au format domaine.service requis", { action: this._actionLabel(key) }));
             }
           }
-          if (a.action === "navigate" && !a.navigation_path) throw new Error(`${ACTION_LABELS[key]} : chemin requis`);
-          if (a.action === "url" && !a.url_path) throw new Error(`${ACTION_LABELS[key]} : URL requise`);
+          if (a.action === "navigate" && !a.navigation_path) throw new Error(this._t("{action} : chemin requis", { action: this._actionLabel(key) }));
+          if (a.action === "url" && !a.url_path) throw new Error(this._t("{action} : URL requise", { action: this._actionLabel(key) }));
           out[key] = a;
         }
       } catch (err) {
-        errBox.textContent = "Pas encore appliqué : " + (err.message || err);
+        errBox.textContent = this._t("Pas encore appliqué : {message}", { message: err.message || err });
         return;
       }
       errBox.textContent = "";
@@ -1023,31 +1360,31 @@ Si le dashboard « ${path} » a été créé vide, supprime-le dans Paramètres,
     };
     const actionBoxes = ACTION_KEYS.map((k) => this._actionEditor(k, draft, text, rowFn, commit));
 
-    const del = h("button", { type: "button", class: "danger", text: "Supprimer la bulle" });
-    del.addEventListener("click", () => { if (confirm("Supprimer cette bulle ?")) this._deleteTile(tile.id); });
-    const done = h("button", { type: "button", text: "Fermer" });
+    const del = h("button", { type: "button", class: "danger", text: this._t("Supprimer la bulle") });
+    del.addEventListener("click", () => { if (confirm(this._t("Supprimer cette bulle ?"))) this._deleteTile(tile.id); });
+    const done = h("button", { type: "button", text: this._t("Fermer") });
     done.addEventListener("click", () => this._select(null));
 
     panel.append(
-      h("h3", { text: "Bulle sélectionnée" }),
+      h("h3", { text: this._t("Bulle sélectionnée") }),
       h("div", { class: "cols" }, [
-        lbl("Nom", text(tile.name, (v) => this._live(tile, () => { tile.name = v; }), { placeholder: "Nom (sinon nom de l'entité)" })),
-        lbl("Icône", iconCtl),
-        lbl("Appareil", devCtl),
-        lbl("Entité", entCtl),
-        lbl("Affichage du nom", mode),
-        lbl("Forme", shape),
-        lbl("Taille (hauteur)", h("div", { class: "inline" }, [size, sizeVal])),
+        lbl(this._t("Nom"), text(tile.name, (v) => this._live(tile, () => { tile.name = v; }), { placeholder: this._t("Nom (sinon nom de l'entité)") })),
+        lbl(this._t("Icône"), iconCtl),
+        lbl(this._t("Appareil"), devCtl),
+        lbl(this._t("Entité"), entCtl),
+        lbl(this._t("Affichage du nom"), mode),
+        lbl(this._t("Forme"), shape),
+        lbl(this._t("Taille (hauteur)"), h("div", { class: "inline" }, [size, sizeVal])),
         widthRow,
-        lbl("Couleur de l'icône", h("div", { class: "inline" }, [colorText, colorPick])),
+        lbl(this._t("Couleur de l'icône"), h("div", { class: "inline" }, [colorText, colorPick])),
         onRow,
         offRow,
         movingRow,
         partialRow,
       ]),
-      check(tile.show_state === true, (v) => this._live(tile, () => { tile.show_state = v; }), "Afficher l'état sous la bulle"),
-      check(tile.transparent, (v) => this._live(tile, () => { tile.transparent = v; }), "Fond transparent (icône seule)"),
-      h("details", null, [h("summary", { text: "Actions (clic, double clic, appui long)" }), ...actionBoxes, errBox]),
+      check(tile.show_state === true, (v) => this._live(tile, () => { tile.show_state = v; }), this._t("Afficher l'état sous la bulle")),
+      check(tile.transparent, (v) => this._live(tile, () => { tile.transparent = v; }), this._t("Fond transparent (icône seule)")),
+      h("details", null, [h("summary", { text: this._t("Actions (clic, double clic, appui long)") }), ...actionBoxes, errBox]),
       h("div", { class: "btns" }, [del, done]),
     );
   }
@@ -1107,7 +1444,7 @@ Si le dashboard « ${path} » a été créé vide, supprime-le dans Paramètres,
       const area = hass.devices[id].area_id && hass.areas && hass.areas[hass.devices[id].area_id];
       out.push({ id, label: area && area.name ? `${name} (${area.name})` : name });
     }
-    return out.sort((a, b) => a.label.localeCompare(b.label, "fr"));
+    return out.sort((a, b) => a.label.localeCompare(b.label, this._lang));
   }
 
   _pickDevice(tile, deviceId) {
@@ -1343,12 +1680,12 @@ Si le dashboard « ${path} » a été créé vide, supprime-le dans Paramètres,
   _actionEditor(key, draft, textInput, row, commit) {
     const a = draft[key];
     const box = h("div");
-    const sel = h("select", { "aria-label": ACTION_LABELS[key] });
+    const sel = h("select", { "aria-label": this._actionLabel(key) });
     const isTap = key === "tap_action";
     if (!isTap && a.action === "none") a.action = "default";
     const choices = [
-      ["default", isTap ? "Par défaut (plus d'infos si entité)" : "Aucune"],
-      ...ACTION_TYPES.filter(([t]) => isTap || t !== "none"),
+      ["default", isTap ? this._t("Par défaut (plus d'infos si entité)") : this._t("Aucune")],
+      ...this._actionTypes().filter(([t]) => isTap || t !== "none"),
     ];
     for (const [v, l] of choices) {
       const o = h("option", { value: v, text: l });
@@ -1359,21 +1696,21 @@ Si le dashboard « ${path} » a été créé vide, supprime-le dans Paramètres,
     const renderSub = () => {
       sub.replaceChildren();
       if (a.action === "call-service") {
-        sub.append(row("Service (domaine.service)", textInput(a.service, (v) => { a.service = v.trim(); commit(); },{ placeholder: "light.turn_on" })));
-        const ta = h("textarea", { "aria-label": "Données JSON", placeholder: '{"entity_id": "light.salon"}' });
+        sub.append(row(this._t("Service (domaine.service)"), textInput(a.service, (v) => { a.service = v.trim(); commit(); },{ placeholder: "light.turn_on" })));
+        const ta = h("textarea", { "aria-label": this._t("Données JSON"), placeholder: '{"entity_id": "light.salon"}' });
         if (a._dataText === undefined) a._dataText = a.data ? JSON.stringify(a.data, null, 2) : "";
         ta.value = a._dataText;
         ta.addEventListener("input", () => { a._dataText = ta.value; commit(); });
-        sub.append(row("Données (JSON, optionnel)", ta));
+        sub.append(row(this._t("Données (JSON, optionnel)"), ta));
       } else if (a.action === "navigate") {
-        sub.append(row("Chemin", textInput(a.navigation_path, (v) => { a.navigation_path = v.trim(); commit(); },{ placeholder: "/lovelace/0" })));
+        sub.append(row(this._t("Chemin"), textInput(a.navigation_path, (v) => { a.navigation_path = v.trim(); commit(); },{ placeholder: "/lovelace/0" })));
       } else if (a.action === "url") {
-        sub.append(row("URL", textInput(a.url_path, (v) => { a.url_path = v.trim(); commit(); },{ placeholder: "https://…" })));
+        sub.append(row(this._t("URL"), textInput(a.url_path, (v) => { a.url_path = v.trim(); commit(); },{ placeholder: "https://…" })));
       }
     };
     sel.addEventListener("change", () => { a.action = sel.value; renderSub(); commit(); });
     renderSub();
-    box.append(h("h3", { text: ACTION_LABELS[key] }), sel, sub);
+    box.append(h("h3", { text: this._actionLabel(key) }), sel, sub);
     return box;
   }
 
@@ -1381,10 +1718,10 @@ Si le dashboard « ${path} » a été créé vide, supprime-le dans Paramètres,
 
   _dashboardUrlPath() {
     const seg = location.pathname.split("/").filter(Boolean)[0];
-    if (!seg) throw new Error("Dashboard non identifiable depuis l'URL.");
+    if (!seg) throw new Error(this._t("Dashboard non identifiable depuis l'URL."));
     const panel = this._hass && this._hass.panels && this._hass.panels[seg];
     if (!panel || panel.component_name !== "lovelace") {
-      throw new Error(`L'URL « /${seg} » n'est pas un dashboard Lovelace.`);
+      throw new Error(this._t("L'URL « /{seg} » n'est pas un dashboard Lovelace.", { seg }));
     }
     return seg === "lovelace" ? null : seg;
   }
@@ -1416,9 +1753,9 @@ Si le dashboard « ${path} » a été créé vide, supprime-le dans Paramètres,
   async _save() {
     if (this._saving || !this._dirty) return;
     this._saving = true;
-    this._setMsg("", "Enregistrement…");
+    this._setMsg("", this._t("Enregistrement…"));
     try {
-      if (!this._canEdit()) throw new Error("Droits administrateur requis.");
+      if (!this._canEdit()) throw new Error(this._t("Droits administrateur requis."));
       const urlPath = this._dashboardUrlPath();
       const req = { type: "lovelace/config", force: true };
       if (urlPath) req.url_path = urlPath;
@@ -1427,17 +1764,17 @@ Si le dashboard « ${path} » a été créé vide, supprime-le dans Paramètres,
         cfg = await this._hass.callWS(req);
       } catch (e) {
         if (e && e.code === "config_not_found") {
-          throw new Error("Ce dashboard n'a pas de configuration stockée (mode YAML ou configuration auto-générée) : enregistrement impossible.");
+          throw new Error(this._t("Ce dashboard n'a pas de configuration stockée (mode YAML ou configuration auto-générée) : enregistrement impossible."));
         }
-        throw new Error("Lecture de la configuration impossible : " + (e && e.message ? e.message : JSON.stringify(e)));
+        throw new Error(this._t("Lecture de la configuration impossible : {message}", { message: e && e.message ? e.message : JSON.stringify(e) }));
       }
       // contrôle d'écart : la carte doit exister telle que chargée
       const found = this._findCards(cfg, this._baseline, [], new WeakSet());
       if (found.length === 0) {
-        throw new Error("Écart détecté : la carte a changé dans le dashboard depuis son chargement (ou a été déplacée). Recharge la page puis refais tes modifications. Rien n'a été écrit.");
+        throw new Error(this._t("Écart détecté : la carte a changé dans le dashboard depuis son chargement (ou a été déplacée). Recharge la page puis refais tes modifications. Rien n'a été écrit."));
       }
       if (found.length > 1) {
-        throw new Error("Plusieurs cartes identiques dans ce dashboard : impossible de savoir laquelle modifier. Rien n'a été écrit.");
+        throw new Error(this._t("Plusieurs cartes identiques dans ce dashboard : impossible de savoir laquelle modifier. Rien n'a été écrit."));
       }
       const target = found[0];
       const next = clone(this._config);
@@ -1454,7 +1791,7 @@ Si le dashboard « ${path} » a été créé vide, supprime-le dans Paramètres,
         if (ll) await ll.saveConfig(cfg);
         else { await this._hass.callWS(saveReq); reload = true; }
       } catch (e) {
-        throw new Error("Écriture refusée : " + (e && e.message ? e.message : JSON.stringify(e)));
+        throw new Error(this._t("Écriture refusée : {message}", { message: e && e.message ? e.message : JSON.stringify(e) }));
       }
       this._config = clone(next);
       this._baseline = stableStringify(next);
@@ -1492,7 +1829,7 @@ const EDITOR_HELPERS = {
   fit_screen: "Conseillé dans une vue de type « Panneau ».",
   switch_path: "Ajoute un bouton en haut à gauche. Ex. /my-dashboard/0 : seul le dernier mot de l'adresse change selon ton dashboard.",
 };
-const EDITOR_SCHEMA = [
+const EDITOR_SCHEMA = (t) => [
   { name: "title", selector: { text: {} } },
   { name: "background", selector: { text: {} } },
   { name: "aspect_ratio", selector: { text: {} } },
@@ -1503,9 +1840,9 @@ const EDITOR_SCHEMA = [
       select: {
         mode: "dropdown",
         options: [
-          { value: "hover", label: "Au survol" },
-          { value: "always", label: "Toujours" },
-          { value: "never", label: "Jamais" },
+          { value: "hover", label: t("Au survol") },
+          { value: "always", label: t("Toujours") },
+          { value: "never", label: t("Jamais") },
         ],
       },
     },
@@ -1523,14 +1860,26 @@ class TilePlacerCardEditor extends HTMLElement {
 
   set hass(hass) {
     this._hass = hass;
-    if (this._form) this._form.hass = hass;
+    // Le premier hass arrive après setConfig : il faut parfois tout reconstruire dans la bonne langue.
+    if (this._form && this._lang === this._langBuilt) this._form.hass = hass;
+    else this._render();
+  }
+
+  get _lang() {
+    return tpcResolveLang(this._hass, this._config && this._config.language);
+  }
+
+  _t(source, values) {
+    return tpcT(this._lang, source, values);
   }
 
   _render() {
-    if (!this._form) {
+    const lang = this._lang;
+    if (!this._form || lang !== this._langBuilt) {
+      this.replaceChildren();
       const form = document.createElement("ha-form");
-      form.computeLabel = (s) => EDITOR_LABELS[s.name] || s.name;
-      form.computeHelper = (s) => EDITOR_HELPERS[s.name] || "";
+      form.computeLabel = (s) => this._t(EDITOR_LABELS[s.name] || s.name);
+      form.computeHelper = (s) => this._t(EDITOR_HELPERS[s.name] || "");
       form.addEventListener("value-changed", (ev) => {
         const cfg = { ...this._config, ...ev.detail.value };
         const defaults = { editable: true, label_mode: "hover", fit_screen: false };
@@ -1542,14 +1891,15 @@ class TilePlacerCardEditor extends HTMLElement {
         this.dispatchEvent(new CustomEvent("config-changed", { detail: { config: cfg }, bubbles: true, composed: true }));
       });
       this._form = form;
+      this._langBuilt = lang;
       this.append(form);
       this.append(h("p", {
         style: "font-size:13px;color:var(--secondary-text-color)",
-        text: "Les bulles se placent directement sur le plan : clique sur le crayon de la carte, puis « + Nouvel appareil ».",
+        text: this._t("Les bulles se placent directement sur le plan : clique sur le crayon de la carte, puis « + Nouvel appareil »."),
       }));
     }
     this._form.hass = this._hass;
-    this._form.schema = EDITOR_SCHEMA;
+    this._form.schema = EDITOR_SCHEMA((s, values) => tpcT(lang, s, values));
     this._form.data = { editable: true, label_mode: "hover", fit_screen: false, ...this._config };
   }
 }
@@ -1566,7 +1916,7 @@ if (!window.customCards.some((c) => c.type === "tile-placer-card")) {
   window.customCards.push({
     type: "tile-placer-card",
     name: "Tile Placer Card",
-    description: "Tuiles (icône, libellé, état) positionnables en glisser-déposer sur une image de fond.",
+    description: "Tiles (icon, label, state) placed by drag and drop on a background image.",
     preview: false,
   });
 }

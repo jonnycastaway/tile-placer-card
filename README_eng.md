@@ -67,7 +67,7 @@ HACS registers the resource automatically, and updates also go through HACS.
 ### Manual
 
 1. Copy `tile-placer-card.js` to `/config/www/`.
-2. Go to Settings, Dashboards, ⋮ menu, **Resources**, and add `/local/tile-placer-card.js?v=0.9.60` as a **JavaScript module**.
+2. Go to Settings, Dashboards, ⋮ menu, **Resources**, and add `/local/tile-placer-card.js?v=0.9.61` as a **JavaScript module**.
 3. Change the `?v=` value after each update: Home Assistant caches `/local/` for a very long time.
 
 ## Quick start
@@ -212,7 +212,10 @@ More examples in [`examples/basic.yaml`](examples/basic.yaml).
 | `editable` | `false` hides the pencil (default `true`). Editing also requires an administrator account. |
 | `switch_path` | Address of another plan (e.g. `/my-dashboard/0`). Adds a button at the top left to switch to it. Optional. |
 | `switch_label` | Text of the switch button. Optional. |
+| `language` | Interface language: `fr`, `de` or `en`. When omitted, it follows the language of the Home Assistant profile. Optional. |
 | `tiles` | List of bubbles. |
+
+**Languages.** The interface (toolbar, bubble panel, editor, messages) follows the language of the Home Assistant profile. German and English are included; everything else falls back to French, including while the card has not received the `hass` object yet. The `language` option forces a language, for example for a dashboard shared between several accounts.
 
 ### Bubble options
 
@@ -321,7 +324,7 @@ If you already have a `picture-elements` plan and want to move between the two, 
 - **Background image does not show.** The file is not in `/config/www/` or the address is wrong. Try `/local/plan.png` in the browser.
 - **An action does not respond.** Reopen the bubble panel: a "Not applied yet" message points to the field to fix. Remember to save afterwards.
 
-Note: the card's interface and messages are currently in French.
+Note: the German and English translations are provided by the card itself; the list of texts lives in `TPC_STRINGS` at the top of `tile-placer-card.js`, where other languages can be added.
 
 ## Development
 
